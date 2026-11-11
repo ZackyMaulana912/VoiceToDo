@@ -12,7 +12,12 @@ struct HomeView: View {
     @State private var filter: Filter = .pending
 
     private var visibleTodos: [TodoItem] {
-        store.todos.filter { filter == .completed ? $0.isDone : !$0.isDone }
+        // To-do yang sudah tampil di kartu hasil tidak diulang di daftar bawahnya. Setelah kartu hasil
+        // ditutup (pindah tab atau segmen), to-do itu kembali muncul di daftar seperti biasa.
+        let inResultCard: Set<UUID> = store.banner?.kind == .result ? Set(bannerRecording?.todoIDs ?? []) : []
+        return store.todos.filter {
+            (filter == .completed ? $0.isDone : !$0.isDone) && !inResultCard.contains($0.id)
+        }
     }
 
     private var bannerRecording: Recording? {

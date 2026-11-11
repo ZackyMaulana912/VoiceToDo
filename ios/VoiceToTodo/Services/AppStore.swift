@@ -63,6 +63,18 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    /// Menghapus rekaman beserta to-do dan file audionya. Rekaman yang sedang diproses tidak bisa dihapus.
+    func deleteRecording(_ id: UUID) {
+        guard let rec = recording(id), rec.status != .processing else { return }
+        todos.removeAll { $0.recordingID == id || rec.todoIDs.contains($0.id) }
+        recordings.removeAll { $0.id == id }
+        if banner?.recordingID == id { banner = nil }
+        // Audio hanya dihapus bila data baru berhasil disimpan. Kalau gagal, rekaman muncul lagi saat aplikasi
+        // dibuka, jadi audionya harus masih ada.
+        guard save(), let name = rec.audioFileName, !name.isEmpty else { return }
+        try? FileManager.default.removeItem(at: SpeechRecorder.folder.appendingPathComponent(name))
+    }
+
     func updateSummary(_ recordingID: UUID, text: String) {
         update(recordingID) { $0.summary = text }
     }
@@ -133,6 +145,11 @@ final class AppStore: ObservableObject {
         }
 
         let result = await SummarizerService.summarize(transcript, date: current.createdAt)
+        // Jaga-jaga: rekaman sudah tidak ada (dihapus) saat ringkasan selesai. Jangan tambahkan to-do yatim.
+        guard recording(id) != nil else {
+            if banner?.recordingID == id { banner = nil }
+            return
+        }
         let short = Formatters.short.string(from: current.createdAt)
         let newTodos = result.todos.map {
             TodoItem(
@@ -210,23 +227,27 @@ final class AppStore: ObservableObject {
         recordings = snapshot.recordings
     }
 
-    private func save() {
-        guard canSave else { return }
+    /// True bila data berhasil ditulis ke HP.
+    @discardableResult
+    private func save() -> Bool {
+        guard canSave else { return false }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         do {
             let data = try encoder.encode(Snapshot(todos: todos, recordings: recordings))
             try data.write(to: fileURL, options: .atomic)
             saveFailureShown = false
+            return true
         } catch {
             // Jangan gagal diam-diam: perubahan hanya ada di memori dan hilang saat aplikasi ditutup.
-            guard !saveFailureShown else { return }
+            guard !saveFailureShown else { return false }
             saveFailureShown = true
             problem = Problem(
                 title: "Gagal menyimpan",
                 message: "Perubahan terakhir belum tersimpan di HP, jadi bisa hilang saat aplikasi ditutup. "
                     + "Pastikan ruang penyimpanan HP masih cukup. (\(error.localizedDescription))"
             )
+            return false
         }
     }
 }

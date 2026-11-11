@@ -91,6 +91,7 @@ struct DetailView: View {
 
     @State private var showTranscript = false
     @State private var pendingTodoDelete: TodoItem?
+    @State private var confirmDeleteRecording = false
 
     var body: some View {
         if let recording = store.recording(recordingID) {
@@ -137,6 +138,9 @@ struct DetailView: View {
                         case .failed:
                             FailedCardView(message: recording.failMessage, onRetry: recording.canRetry ? onRetry : nil)
                         }
+                        if recording.status != .processing {
+                            deleteRecordingButton(recording)
+                        }
                     }
                     .padding(.bottom, 16)
                 }
@@ -146,6 +150,33 @@ struct DetailView: View {
             .frame(maxHeight: .infinity, alignment: .top)
         } else {
             Color.clear.onAppear(perform: onBack)
+        }
+    }
+
+    private func deleteRecordingButton(_ recording: Recording) -> some View {
+        let todoCount = store.todos(for: recording).count
+        return Button { confirmDeleteRecording = true } label: {
+            Text("Hapus rekaman")
+                .font(.inter(16, weight: .semibold))
+                .foregroundStyle(Color(hex: 0xDC2626))
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.white)
+                .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 8)
+        .confirmationDialog("Hapus rekaman ini?", isPresented: $confirmDeleteRecording, titleVisibility: .visible) {
+            Button("Hapus rekaman", role: .destructive) {
+                store.deleteRecording(recording.id)
+                onBack()
+            }
+            Button("Batal", role: .cancel) {}
+        } message: {
+            Text(todoCount == 0
+                 ? "Audio dan isi rekaman ini akan dihapus dan tidak bisa dikembalikan."
+                 : "Audio, isi rekaman, dan \(todoCount) to-do dari rekaman ini akan dihapus dan tidak bisa dikembalikan.")
         }
     }
 

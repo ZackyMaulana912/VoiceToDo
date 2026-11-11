@@ -77,6 +77,8 @@ struct Recording: Identifiable, Codable, Equatable {
     var todoIDs: [UUID] = []
     var transcript = ""
     var audioFileName: String?
+    /// Diisi bila rekaman berhenti sendiri (telepon masuk, layar dikunci, dll.), bukan karena tombol Selesai.
+    var stopNote: String?
 
     var dateText: String { Formatters.full.string(from: createdAt) }
     var durationText: String { Formatters.duration(duration) }

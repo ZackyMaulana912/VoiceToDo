@@ -5,6 +5,7 @@ struct RecordingView: View {
     let onCancel: () -> Void
     let onFinish: (RecordedAudio) -> Void
 
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isFinishing = false
     @State private var confirmCancel = false
 
@@ -53,6 +54,16 @@ struct RecordingView: View {
         .task { startIfNeeded() }
         .onChange(of: recorder.elapsed) { value in
             if value >= SpeechRecorder.maxSeconds { finish() }
+        }
+        .onChange(of: recorder.interruption) { reason in
+            if let reason { finish(note: reason) }
+        }
+        .onChange(of: scenePhase) { phase in
+            // Tanpa izin rekam di latar belakang, iOS memutus mikrofon saat layar dikunci atau aplikasi
+            // ditinggalkan. Simpan bagian yang sudah terekam (REKAMAN_TERPUTUS) supaya tidak hilang.
+            if phase == .background {
+                finish(note: "Rekaman berhenti karena layar dikunci atau aplikasi ditinggalkan.")
+            }
         }
     }
 
@@ -132,7 +143,7 @@ struct RecordingView: View {
             }
 
             if recorder.errorMessage == nil {
-                Button(action: finish) {
+                Button { finish() } label: {
                     HStack(spacing: 10) {
                         Image("stop").frame(width: 20, height: 20)
                         Text("Selesai").font(.inter(16, weight: .semibold))
@@ -162,12 +173,16 @@ struct RecordingView: View {
         onCancel()
     }
 
-    private func finish() {
+    private func finish(note: String? = nil) {
         guard !isFinishing, recorder.errorMessage == nil else { return }
         isFinishing = true
+        // Minta waktu tambahan ke iOS supaya penyimpanan tetap selesai walau aplikasi sedang ditinggalkan.
+        let app = UIApplication.shared
+        let backgroundTask = app.beginBackgroundTask(withName: "simpan-rekaman")
         Task {
-            let audio = await recorder.stop()
+            let audio = await recorder.stop(note: note)
             onFinish(audio)
+            if backgroundTask != .invalid { app.endBackgroundTask(backgroundTask) }
         }
     }
 }

@@ -115,6 +115,12 @@ struct DetailView: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
+                        if let note = recording.stopNote {
+                            Text(note)
+                                .font(.inter(13, weight: .medium))
+                                .foregroundStyle(Color(hex: 0x92400E))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                         switch recording.status {
                         case .done:
                             ResultCardView(

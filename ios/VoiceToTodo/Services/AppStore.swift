@@ -63,7 +63,8 @@ final class AppStore: ObservableObject {
             status: .processing,
             duration: audio.duration,
             transcript: audio.transcript,
-            audioFileName: audio.fileName
+            audioFileName: audio.fileName,
+            stopNote: audio.stopNote
         )
         recordings.insert(rec, at: 0)
         banner = Banner(kind: .processing, recordingID: rec.id)

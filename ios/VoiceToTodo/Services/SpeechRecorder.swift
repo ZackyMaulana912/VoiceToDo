@@ -6,6 +6,7 @@ struct RecordedAudio {
     let fileName: String
     let duration: Int
     let transcript: String
+    var stopNote: String? = nil
 }
 
 enum PermissionResult {
@@ -68,6 +69,9 @@ final class SpeechRecorder: ObservableObject {
     @Published private(set) var elapsed = 0
     @Published private(set) var levels = [CGFloat](repeating: 0.1, count: SpeechRecorder.barCount)
     @Published var errorMessage: String?
+    /// Terisi bila perekaman diputus dari luar (telepon masuk, Siri, alarm, earphone dicabut).
+    /// Layar perekam memantau ini lalu menyimpan bagian yang sudah terekam.
+    @Published private(set) var interruption: String?
 
     static var folder: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -88,6 +92,39 @@ final class SpeechRecorder: ObservableObject {
     private var isStopping = false
     private var finalReceived = false
     private var lastTaskStart = Date.distantPast
+    private var observers: [NSObjectProtocol] = []
+
+    init() {
+        let center = NotificationCenter.default
+        // Telepon masuk, Siri, alarm, atau aplikasi lain mengambil alih mikrofon.
+        observers.append(center.addObserver(
+            forName: AVAudioSession.interruptionNotification, object: nil, queue: .main
+        ) { [weak self] notification in
+            let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            guard raw == AVAudioSession.InterruptionType.began.rawValue else { return }
+            Task { @MainActor in
+                self?.interrupt("Rekaman berhenti karena ada panggilan masuk atau aplikasi lain memakai mikrofon.")
+            }
+        })
+        // Mikrofon berganti (earphone dicabut atau disambung). Mesin audio berhenti sendiri saat ini terjadi,
+        // jadi tanpa ini timer tetap jalan padahal suara tidak lagi terekam.
+        observers.append(center.addObserver(
+            forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.interrupt("Rekaman berhenti karena mikrofon berganti, misalnya earphone dicabut atau disambung.")
+            }
+        })
+    }
+
+    deinit {
+        observers.forEach(NotificationCenter.default.removeObserver)
+    }
+
+    private func interrupt(_ reason: String) {
+        guard isRecording, interruption == nil else { return }
+        interruption = reason
+    }
 
     // MARK: Permissions
 
@@ -111,6 +148,7 @@ final class SpeechRecorder: ObservableObject {
 
     func start() throws {
         errorMessage = nil
+        interruption = nil
         // Lupakan nama file rekaman sebelumnya. Kalau start() gagal sebelum file baru dibuat,
         // cancel() tidak boleh menghapus file rekaman lama (atau seluruh folder saat nama kosong).
         fileName = ""
@@ -159,7 +197,8 @@ final class SpeechRecorder: ObservableObject {
         { buffer, _ in sink.write(buffer) }
     }
 
-    func stop() async -> RecordedAudio {
+    /// `note` diisi bila rekaman berhenti bukan karena tombol Selesai; ikut tersimpan di rekaman.
+    func stop(note: String? = nil) async -> RecordedAudio {
         isRecording = false
         isStopping = true
         timer?.invalidate()
@@ -179,7 +218,7 @@ final class SpeechRecorder: ObservableObject {
 
         teardown()
         let text = committed.trimmingCharacters(in: .whitespacesAndNewlines)
-        return RecordedAudio(fileName: fileName, duration: elapsed, transcript: text)
+        return RecordedAudio(fileName: fileName, duration: elapsed, transcript: text, stopNote: note)
     }
 
     func cancel() {

@@ -104,6 +104,32 @@ berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**
 | Rekaman terputus: telepon masuk | Minta orang menelepon saat merekam | belum diuji |
 | Rekaman terputus: earphone | Cabut atau sambungkan earphone/AirPods saat merekam | belum diuji |
 | Bug 1: Tutup tidak menghapus rekaman lama | Putar musik/telepon yang memakai mikrofon, lalu mulai merekam sampai gagal, tekan Tutup: rekaman lama di Riwayat tetap ada | belum diuji |
+| To-do tidak dobel di Beranda | Selesaikan satu rekaman: to-do hanya tampil di kartu hasil. Pindah ke Riwayat lalu kembali: to-do muncul di daftar | belum diuji |
+| Edit ringkasan dengan Batal dan Simpan | Tekan Edit, ubah teks, tekan Batal: teks kembali seperti semula. Ubah lagi, tekan Simpan: tersimpan. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
+| Pesan gagal sesuai penyebab | Rekam diam saja: "Tidak ada suara yang terdengar…". Rekam satu-dua kata: "…terlalu pendek…". Tutup paksa aplikasi saat memproses lalu buka lagi: "Proses terhenti…" | belum diuji |
 
 Sudah dibuktikan di Mac (2026-11-12, kode `Models.swift` asli dikompilasi untuk macOS): rekaman lama tanpa kolom
 keterangan baru (`stopNote`) tetap terbaca, dan keterangan tersimpan lalu terbaca kembali dengan benar.
+
+### 2026-11-12, uji logika penyimpanan dan pesan gagal di Mac
+
+`AppStore.swift`, `Models.swift`, dan `DesignTokens.swift` asli dikompilasi untuk macOS. Pengenal ucapan dan peringkas
+diganti tiruan supaya setiap jenis kegagalan bisa dipicu. Folder data diarahkan ke scratchpad (bukan Documents milik
+user) dan dihapus setelah uji. Hasil: 13 dari 13 lolos.
+
+| Uji | Hasil |
+|---|---|
+| Data lama tanpa kolom baru (`stopNote`, `failReason`) terbaca, tanpa pesan masalah | v |
+| Rekaman yang masih "memproses" saat aplikasi dibuka jadi gagal dengan kode `terganggu` | v |
+| File audio tidak ada: `tanpa-audio`, tombol Coba lagi disembunyikan | v |
+| Pengenal ucapan tidak tersedia: `pengenal-tidak-tersedia` | v |
+| Tidak ada suara: `tidak-terdengar` | v |
+| 1-2 kata: `terlalu-pendek`, transkrip diambil dari hasil dengar ulang file audio | v |
+| Coba lagi berhasil: status selesai dan kode gagal dihapus | v |
+| Data tersimpan terbaca ulang saat aplikasi dibuka lagi | v |
+| Folder data tidak bisa ditulisi: muncul pesan "Gagal menyimpan" | v |
+| Gagal berturut-turut: pesan tidak muncul berulang | v |
+| Penyimpanan pulih lalu gagal lagi: pesan muncul lagi | v |
+
+Keterbatasan: penyebab teknis di akhir pesan "Gagal menyimpan" berbahasa Inggris di Mac. Di iPhone berbahasa
+Indonesia diduga ikut bahasa HP, belum dilihat.

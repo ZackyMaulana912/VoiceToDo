@@ -31,6 +31,14 @@ struct RootView: View {
                     }
                 }
             }
+            .alert("Data lama tidak terbaca", isPresented: Binding(
+                get: { store.loadProblem != nil },
+                set: { if !$0 { store.loadProblem = nil } }
+            )) {
+                Button("Oke", role: .cancel) {}
+            } message: {
+                Text(store.loadProblem ?? "")
+            }
         }
         .environmentObject(store)
         .alert("Izin dibutuhkan", isPresented: Binding(

@@ -17,8 +17,12 @@ final class AppStore: ObservableObject {
     @Published private(set) var todos: [TodoItem] = []
     @Published private(set) var recordings: [Recording] = []
     @Published var banner: Banner?
+    /// Pesan untuk pengguna bila data lama tidak bisa dibaca saat aplikasi dibuka.
+    @Published var loadProblem: String?
 
     private let fileURL: URL
+    /// False bila data lama tidak terbaca dan gagal diamankan; mencegah data lama tertimpa.
+    private var canSave = true
 
     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -125,10 +129,27 @@ final class AppStore: ObservableObject {
     // MARK: Persistence
 
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL) else { return }
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return } // pemakaian pertama
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        guard var snapshot = try? decoder.decode(Snapshot.self, from: data) else { return }
+        var snapshot: Snapshot
+        do {
+            snapshot = try decoder.decode(Snapshot.self, from: Data(contentsOf: fileURL))
+        } catch {
+            // Data lama tidak terbaca (misalnya bentuk data berubah setelah update). Jangan dimulai kosong
+            // lalu ditimpa: pindahkan dulu ke file cadangan supaya isinya tetap ada.
+            let backup = fileURL.deletingLastPathComponent()
+                .appendingPathComponent("voice-to-todo-cadangan-\(Int(Date().timeIntervalSince1970)).json")
+            do {
+                try FileManager.default.moveItem(at: fileURL, to: backup)
+                loadProblem = "Data lama tidak bisa dibaca, jadi aplikasi dimulai kosong. "
+                    + "Salinannya aman tersimpan sebagai \(backup.lastPathComponent)."
+            } catch {
+                canSave = false
+                loadProblem = "Data lama tidak bisa dibaca. Perubahan baru tidak disimpan supaya data lama tidak tertimpa."
+            }
+            return
+        }
         // A recording left "processing" means the app was closed mid-way; let the user retry.
         for i in snapshot.recordings.indices where snapshot.recordings[i].status == .processing {
             snapshot.recordings[i].status = .failed
@@ -138,6 +159,7 @@ final class AppStore: ObservableObject {
     }
 
     private func save() {
+        guard canSave else { return }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(Snapshot(todos: todos, recordings: recordings)) else { return }

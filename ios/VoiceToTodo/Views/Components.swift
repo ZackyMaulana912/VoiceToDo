@@ -111,19 +111,31 @@ struct ResultCardView: View {
     let onSummaryChange: (String) -> Void
 
     @State private var isEditing = false
+    /// Salinan ringkasan selama diedit. Baru disimpan saat menekan Simpan; Batal membuangnya.
+    @State private var draft = ""
     @State private var copied = false
+
+    private var draftIsEmpty: Bool {
+        draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             CategoryChip(category: recording.category)
 
             if isEditing {
-                TextEditor(text: Binding(get: { recording.summary }, set: onSummaryChange))
+                TextEditor(text: $draft)
                     .font(.inter(16))
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: 130)
                     .padding(6)
-                    .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.brand, lineWidth: 1) }
+                    .overlay { RoundedRectangle(cornerRadius: 8).stroke(draftIsEmpty ? Color(hex: 0xDC2626) : Color.brand, lineWidth: 1) }
+                    .accessibilityLabel("Ringkasan")
+                if draftIsEmpty {
+                    Text("Ringkasan tidak boleh kosong.")
+                        .font(.inter(13, weight: .medium))
+                        .foregroundStyle(Color(hex: 0xB91C1C))
+                }
             } else {
                 Text(recording.summary)
                     .font(.inter(16))
@@ -166,8 +178,18 @@ struct ResultCardView: View {
             }
 
             HStack(spacing: 16) {
-                actionButton(title: copied ? "Tersalin" : "Salin", icon: "copy", action: copy)
-                actionButton(title: isEditing ? "Simpan" : "Edit", icon: "edit") { isEditing.toggle() }
+                if isEditing {
+                    actionButton(title: "Batal", icon: nil) { isEditing = false }
+                    actionButton(title: "Simpan", icon: "edit", action: saveDraft)
+                        .disabled(draftIsEmpty)
+                        .opacity(draftIsEmpty ? 0.5 : 1)
+                } else {
+                    actionButton(title: copied ? "Tersalin" : "Salin", icon: "copy", action: copy)
+                    actionButton(title: "Edit", icon: "edit") {
+                        draft = recording.summary
+                        isEditing = true
+                    }
+                }
             }
             .padding(.top, 4)
         }
@@ -176,10 +198,17 @@ struct ResultCardView: View {
         .cardStyle()
     }
 
-    private func actionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func saveDraft() {
+        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        if text != recording.summary { onSummaryChange(text) }
+        isEditing = false
+    }
+
+    private func actionButton(title: String, icon: String?, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                Image(icon).frame(width: 20, height: 20)
+                if let icon { Image(icon).frame(width: 20, height: 20) }
                 Text(title).font(.inter(13, weight: .medium))
             }
             .foregroundStyle(Color.brand)

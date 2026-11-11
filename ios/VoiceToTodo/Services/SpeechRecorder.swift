@@ -326,6 +326,11 @@ enum SpeechTranscriber {
         }
     }
 
+    /// False bila pengenal ucapan Bahasa Indonesia sedang tidak bisa dipakai (misalnya butuh internet).
+    static var isAvailable: Bool {
+        SFSpeechRecognizer(locale: Locale(identifier: "id-ID"))?.isAvailable ?? false
+    }
+
     static func transcribe(url: URL) async -> String? {
         guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "id-ID")), recognizer.isAvailable else {
             return nil

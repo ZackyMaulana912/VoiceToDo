@@ -49,7 +49,7 @@ struct HistoryView: View {
         let subtitle: String
         switch recording.status {
         case .processing: subtitle = "Merangkum rekaman \(recording.durationText)..."
-        case .failed: subtitle = "Rekamanmu aman tersimpan."
+        case .failed: subtitle = recording.failMessage
         case .done: subtitle = recording.summary.components(separatedBy: ". ").first ?? recording.summary
         }
         return VStack(alignment: .leading, spacing: 0) {
@@ -133,7 +133,7 @@ struct DetailView: View {
                         case .processing:
                             ProcessingCardView(duration: recording.durationText)
                         case .failed:
-                            FailedCardView(onRetry: onRetry)
+                            FailedCardView(message: recording.failMessage, onRetry: recording.canRetry ? onRetry : nil)
                         }
                     }
                     .padding(.bottom, 16)

@@ -59,7 +59,10 @@ struct HomeView: View {
             case .processing:
                 ProcessingCardView(duration: recording.durationText)
             case .failed:
-                FailedCardView { store.retry(recording.id) }
+                FailedCardView(
+                    message: recording.failMessage,
+                    onRetry: recording.canRetry ? { store.retry(recording.id) } : nil
+                )
             case .result:
                 ResultCardView(
                     recording: recording,

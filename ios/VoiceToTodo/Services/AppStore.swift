@@ -17,12 +17,19 @@ final class AppStore: ObservableObject {
     @Published private(set) var todos: [TodoItem] = []
     @Published private(set) var recordings: [Recording] = []
     @Published var banner: Banner?
-    /// Pesan untuk pengguna bila data lama tidak bisa dibaca saat aplikasi dibuka.
-    @Published var loadProblem: String?
+    struct Problem: Equatable {
+        var title: String
+        var message: String
+    }
+
+    /// Masalah penyimpanan yang harus diketahui pengguna (data lama tidak terbaca, gagal menyimpan).
+    @Published var problem: Problem?
 
     private let fileURL: URL
     /// False bila data lama tidak terbaca dan gagal diamankan; mencegah data lama tertimpa.
     private var canSave = true
+    /// Supaya pesan gagal menyimpan tidak muncul berulang-ulang; diulang lagi setelah ada penyimpanan yang berhasil.
+    private var saveFailureShown = false
 
     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -84,18 +91,35 @@ final class AppStore: ObservableObject {
         banner = Banner(kind: .processing, recordingID: id)
 
         var transcript = current.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        if Self.wordCount(transcript) < Self.minWords, let name = current.audioFileName {
+        var audioMissing = false
+        var recognizerUnavailable = false
+        if Self.wordCount(transcript) < Self.minWords {
             // Transkrip langsung kosong atau terlalu pendek: dengarkan ulang dari file audio yang tersimpan.
             // Dulu hanya dicoba saat kosong, jadi transkrip 1-2 kata membuat "Coba lagi" selalu gagal dengan hasil sama.
-            let fromFile = (await SpeechTranscriber.transcribe(url: SpeechRecorder.folder.appendingPathComponent(name)) ?? "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            if Self.wordCount(fromFile) > Self.wordCount(transcript) {
-                transcript = fromFile
+            let audioURL = current.audioFileName.map { SpeechRecorder.folder.appendingPathComponent($0) }
+            if let audioURL, FileManager.default.fileExists(atPath: audioURL.path) {
+                if SpeechTranscriber.isAvailable {
+                    let fromFile = (await SpeechTranscriber.transcribe(url: audioURL) ?? "")
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    if Self.wordCount(fromFile) > Self.wordCount(transcript) {
+                        transcript = fromFile
+                    }
+                } else {
+                    recognizerUnavailable = true
+                }
+            } else {
+                audioMissing = true
             }
         }
 
-        guard Self.wordCount(transcript) >= Self.minWords else {
-            update(id) { $0.status = .failed; $0.transcript = transcript; $0.summary = "Rekamanmu aman tersimpan." }
+        let words = Self.wordCount(transcript)
+        guard words >= Self.minWords else {
+            let reason: FailReason
+            if audioMissing { reason = .noAudio }
+            else if recognizerUnavailable { reason = .recognizerUnavailable }
+            else if words == 0 { reason = .noSpeech }
+            else { reason = .tooShort }
+            update(id) { $0.status = .failed; $0.failReason = reason; $0.transcript = transcript; $0.summary = "Rekamanmu aman tersimpan." }
             banner = Banner(kind: .failed, recordingID: id)
             return
         }
@@ -115,6 +139,7 @@ final class AppStore: ObservableObject {
         todos.insert(contentsOf: newTodos, at: 0)
         update(id) {
             $0.status = .done
+            $0.failReason = nil
             $0.title = result.title
             $0.category = result.category
             $0.summary = result.summary
@@ -154,17 +179,24 @@ final class AppStore: ObservableObject {
                 .appendingPathComponent("voice-to-todo-cadangan-\(Int(Date().timeIntervalSince1970)).json")
             do {
                 try FileManager.default.moveItem(at: fileURL, to: backup)
-                loadProblem = "Data lama tidak bisa dibaca, jadi aplikasi dimulai kosong. "
-                    + "Salinannya aman tersimpan sebagai \(backup.lastPathComponent)."
+                problem = Problem(
+                    title: "Data lama tidak terbaca",
+                    message: "Data lama tidak bisa dibaca, jadi aplikasi dimulai kosong. "
+                        + "Salinannya aman tersimpan sebagai \(backup.lastPathComponent)."
+                )
             } catch {
                 canSave = false
-                loadProblem = "Data lama tidak bisa dibaca. Perubahan baru tidak disimpan supaya data lama tidak tertimpa."
+                problem = Problem(
+                    title: "Data lama tidak terbaca",
+                    message: "Data lama tidak bisa dibaca. Perubahan baru tidak disimpan supaya data lama tidak tertimpa."
+                )
             }
             return
         }
         // A recording left "processing" means the app was closed mid-way; let the user retry.
         for i in snapshot.recordings.indices where snapshot.recordings[i].status == .processing {
             snapshot.recordings[i].status = .failed
+            snapshot.recordings[i].failReason = .interrupted
         }
         todos = snapshot.todos
         recordings = snapshot.recordings
@@ -174,7 +206,19 @@ final class AppStore: ObservableObject {
         guard canSave else { return }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        guard let data = try? encoder.encode(Snapshot(todos: todos, recordings: recordings)) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        do {
+            let data = try encoder.encode(Snapshot(todos: todos, recordings: recordings))
+            try data.write(to: fileURL, options: .atomic)
+            saveFailureShown = false
+        } catch {
+            // Jangan gagal diam-diam: perubahan hanya ada di memori dan hilang saat aplikasi ditutup.
+            guard !saveFailureShown else { return }
+            saveFailureShown = true
+            problem = Problem(
+                title: "Gagal menyimpan",
+                message: "Perubahan terakhir belum tersimpan di HP, jadi bisa hilang saat aplikasi ditutup. "
+                    + "Pastikan ruang penyimpanan HP masih cukup. (\(error.localizedDescription))"
+            )
+        }
     }
 }

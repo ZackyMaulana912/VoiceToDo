@@ -41,13 +41,13 @@ struct RootView: View {
                     }
                 }
             }
-            .alert("Data lama tidak terbaca", isPresented: Binding(
-                get: { store.loadProblem != nil },
-                set: { if !$0 { store.loadProblem = nil } }
+            .alert(store.problem?.title ?? "", isPresented: Binding(
+                get: { store.problem != nil },
+                set: { if !$0 { store.problem = nil } }
             )) {
                 Button("Oke", role: .cancel) {}
             } message: {
-                Text(store.loadProblem ?? "")
+                Text(store.problem?.message ?? "")
             }
         }
         .environmentObject(store)

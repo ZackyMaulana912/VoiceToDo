@@ -271,26 +271,31 @@ struct ProcessingCardView: View {
 }
 
 struct FailedCardView: View {
-    let onRetry: () -> Void
+    let message: String
+    /// Nil bila "Coba lagi" tidak bisa membantu (misalnya file audio sudah tidak ada).
+    let onRetry: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
                 Image("warn").frame(width: 24, height: 24).padding(.top, 2)
-                Text("Gagal memproses. Rekamanmu aman tersimpan.")
+                Text(message)
                     .font(.inter(16, weight: .medium))
                     .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Button(action: onRetry) {
-                Text("Coba lagi")
-                    .font(.inter(16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(Color.brand)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            if let onRetry {
+                Button(action: onRetry) {
+                    Text("Coba lagi")
+                        .font(.inter(16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(Color.brand)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)

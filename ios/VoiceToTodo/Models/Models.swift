@@ -65,6 +65,32 @@ enum RecordingStatus: String, Codable {
     }
 }
 
+/// Alasan rekaman gagal diproses. Nilai teks dipakai sebagai kode galat (lihat CLAUDE.md 5.6).
+enum FailReason: String, Codable {
+    case interrupted = "terganggu"
+    case noSpeech = "tidak-terdengar"
+    case tooShort = "terlalu-pendek"
+    case recognizerUnavailable = "pengenal-tidak-tersedia"
+    case noAudio = "tanpa-audio"
+
+    var message: String {
+        switch self {
+        case .interrupted: return "Proses terhenti karena aplikasi ditutup. Rekamanmu aman tersimpan."
+        case .noSpeech: return "Tidak ada suara yang terdengar di rekaman ini."
+        case .tooShort: return "Ucapan yang tertangkap terlalu pendek untuk dirangkum (minimal 3 kata). Rekamanmu aman tersimpan."
+        case .recognizerUnavailable:
+            return "Pengenalan ucapan Bahasa Indonesia sedang tidak tersedia. Periksa koneksi internet lalu coba lagi. Rekamanmu aman tersimpan."
+        case .noAudio: return "Audio rekaman ini tidak ada di perangkat, jadi tidak bisa diproses ulang."
+        }
+    }
+
+    /// "Coba lagi" tidak ada gunanya bila file audionya sudah tidak ada.
+    var canRetry: Bool { self != .noAudio }
+
+    /// Pesan untuk rekaman gagal lama yang belum punya alasan.
+    static let genericMessage = "Gagal memproses. Rekamanmu aman tersimpan."
+}
+
 struct Recording: Identifiable, Codable, Equatable {
     var id = UUID()
     var createdAt = Date()
@@ -79,6 +105,11 @@ struct Recording: Identifiable, Codable, Equatable {
     var audioFileName: String?
     /// Diisi bila rekaman berhenti sendiri (telepon masuk, layar dikunci, dll.), bukan karena tombol Selesai.
     var stopNote: String?
+    /// Diisi saat status `failed`. Optional supaya data lama tetap terbaca.
+    var failReason: FailReason?
+
+    var failMessage: String { failReason?.message ?? FailReason.genericMessage }
+    var canRetry: Bool { failReason?.canRetry ?? true }
 
     var dateText: String { Formatters.full.string(from: createdAt) }
     var durationText: String { Formatters.duration(duration) }

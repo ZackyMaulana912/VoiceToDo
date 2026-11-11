@@ -111,6 +111,9 @@ final class SpeechRecorder: ObservableObject {
 
     func start() throws {
         errorMessage = nil
+        // Lupakan nama file rekaman sebelumnya. Kalau start() gagal sebelum file baru dibuat,
+        // cancel() tidak boleh menghapus file rekaman lama (atau seluruh folder saat nama kosong).
+        fileName = ""
         guard let recognizer, recognizer.isAvailable else {
             throw NSError(
                 domain: "VoiceToTodo", code: 1,
@@ -188,7 +191,12 @@ final class SpeechRecorder: ObservableObject {
         task?.cancel()
         task = nil
         teardown()
-        try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(fileName))
+        // Hanya hapus file milik rekaman yang sedang dibatalkan. Nama kosong berarti belum ada file,
+        // dan appendingPathComponent("") menunjuk ke folder Recordings itu sendiri.
+        if !fileName.isEmpty {
+            try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(fileName))
+        }
+        fileName = ""
     }
 
     // MARK: Internals

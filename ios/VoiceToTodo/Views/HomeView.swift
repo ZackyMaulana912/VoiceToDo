@@ -10,6 +10,7 @@ struct HomeView: View {
     }
 
     @State private var filter: Filter = .pending
+    @State private var pendingDelete: TodoItem?
 
     private var visibleTodos: [TodoItem] {
         // To-do yang sudah tampil di kartu hasil tidak diulang di daftar bawahnya. Setelah kartu hasil
@@ -34,6 +35,7 @@ struct HomeView: View {
                     banner
                     ForEach(visibleTodos) { item in
                         TodoCardView(item: item) { withAnimation(.easeInOut(duration: 0.2)) { store.toggle(item.id) } }
+                            .todoMenu { pendingDelete = item }
                     }
                     if visibleTodos.isEmpty && bannerRecording == nil {
                         EmptyStateView(
@@ -46,6 +48,9 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 12)
+            }
+            .confirmTodoDelete($pendingDelete) { id in
+                withAnimation(.easeInOut(duration: 0.2)) { store.deleteTodo(id) }
             }
 
             RecordAreaView(onRecord: onRecord)
@@ -68,7 +73,8 @@ struct HomeView: View {
                     recording: recording,
                     todos: store.todos(for: recording),
                     onToggle: store.toggle,
-                    onSummaryChange: { store.updateSummary(recording.id, text: $0) }
+                    onSummaryChange: { store.updateSummary(recording.id, text: $0) },
+                    onDeleteTodo: { pendingDelete = $0 }
                 )
             }
         }

@@ -65,6 +65,35 @@ struct CheckboxView: View {
     }
 }
 
+extension View {
+    /// Tekan lama sebuah to-do untuk memunculkan menu hapus. Juga bisa lewat aksi VoiceOver.
+    func todoMenu(onDelete: @escaping () -> Void) -> some View {
+        self
+            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 12))
+            .contextMenu {
+                Button(role: .destructive, action: onDelete) {
+                    Label("Hapus to-do", systemImage: "trash")
+                }
+            }
+            .accessibilityAction(named: "Hapus to-do", onDelete)
+    }
+
+    /// Konfirmasi sebelum to-do dihapus. `pending` berisi to-do yang menunggu jawaban.
+    func confirmTodoDelete(_ pending: Binding<TodoItem?>, onConfirm: @escaping (UUID) -> Void) -> some View {
+        confirmationDialog(
+            "Hapus to-do ini?",
+            isPresented: Binding(get: { pending.wrappedValue != nil }, set: { if !$0 { pending.wrappedValue = nil } }),
+            titleVisibility: .visible,
+            presenting: pending.wrappedValue
+        ) { item in
+            Button("Hapus to-do", role: .destructive) { onConfirm(item.id) }
+            Button("Batal", role: .cancel) {}
+        } message: { item in
+            Text("\u{201C}\(item.title)\u{201D} akan dihapus dan tidak bisa dikembalikan.")
+        }
+    }
+}
+
 struct TodoCardView: View {
     let item: TodoItem
     let onToggle: () -> Void
@@ -109,6 +138,8 @@ struct ResultCardView: View {
     let todos: [TodoItem]
     let onToggle: (UUID) -> Void
     let onSummaryChange: (String) -> Void
+    /// Dipanggil saat pengguna memilih "Hapus to-do" dari menu tekan lama.
+    var onDeleteTodo: ((TodoItem) -> Void)? = nil
 
     @State private var isEditing = false
     /// Salinan ringkasan selama diedit. Baru disimpan saat menekan Simpan; Batal membuangnya.
@@ -173,6 +204,8 @@ struct ResultCardView: View {
                                 .lineSpacing(5)
                                 .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
                         }
+                        .background(Color.white)
+                        .todoMenu { onDeleteTodo?(todo) }
                     }
                 }
             }

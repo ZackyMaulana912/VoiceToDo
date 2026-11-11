@@ -90,6 +90,7 @@ struct DetailView: View {
     let onRetry: () -> Void
 
     @State private var showTranscript = false
+    @State private var pendingTodoDelete: TodoItem?
 
     var body: some View {
         if let recording = store.recording(recordingID) {
@@ -127,7 +128,8 @@ struct DetailView: View {
                                 recording: recording,
                                 todos: store.todos(for: recording),
                                 onToggle: store.toggle,
-                                onSummaryChange: { store.updateSummary(recording.id, text: $0) }
+                                onSummaryChange: { store.updateSummary(recording.id, text: $0) },
+                                onDeleteTodo: { pendingTodoDelete = $0 }
                             )
                             transcript(recording)
                         case .processing:
@@ -138,6 +140,7 @@ struct DetailView: View {
                     }
                     .padding(.bottom, 16)
                 }
+                .confirmTodoDelete($pendingTodoDelete) { store.deleteTodo($0) }
             }
             .padding(.horizontal, 16)
             .frame(maxHeight: .infinity, alignment: .top)

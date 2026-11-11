@@ -55,6 +55,14 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func deleteTodo(_ id: UUID) {
+        todos.removeAll { $0.id == id }
+        for i in recordings.indices {
+            recordings[i].todoIDs.removeAll { $0 == id }
+        }
+        save()
+    }
+
     func updateSummary(_ recordingID: UUID, text: String) {
         update(recordingID) { $0.summary = text }
     }

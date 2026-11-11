@@ -29,12 +29,32 @@ Perintah: `xcodebuild -project ios/VoiceToTodo.xcodeproj -scheme VoiceToTodo -de
 Bundle ID diganti dari `com.example.VoiceToTodo` ke `com.zackymaulana912.voicetodo` (dicek di `Info.plist` hasil
 build). Target minimum di proyek masih iOS 16.0.
 
-### Belum dicek (butuh HP dan Apple ID)
+### 2026-11-11, pemasangan ke HP
+
+Signing memakai akun Apple gratis (Personal Team) milik user. Data HP dibaca dengan
+`xcrun devicectl device info details`.
 
 | Hal | iPhone XR | iPhone 17 Pro |
 |---|---|---|
-| Identifier model | | |
-| Versi iOS | | |
-| Ruang kosong | | |
-| Developer Mode aktif | | |
-| Aplikasi bisa dipasang dari Xcode dan dibuka | | |
+| Identifier model | belum diuji | `iPhone18,1` |
+| Versi iOS | belum diuji | 27.3 (build 24C5037i) |
+| Kapasitas penyimpanan | belum diuji | 256 GB (ruang kosong belum dicatat) |
+| Developer Mode | belum diuji | aktif |
+| Aplikasi bisa dipasang dari Xcode | belum diuji | v berhasil (`xcodebuild -allowProvisioningUpdates`, lalu `devicectl device install app`) |
+| Aplikasi bisa dibuka | belum diuji | v berjalan, prosesnya masih hidup 3 detik setelah dibuka. Hanya dibuka, fitur belum dicoba |
+
+Yang terjadi selama pemasangan di 17 Pro:
+
+- Percobaan pertama membuka aplikasi ditolak iPhone ("Untrusted Developer"). Ini perilaku normal untuk akun gratis:
+  profil developer harus dipercayai dulu lewat Settings > General > VPN & Device Management. Langkah ini butuh
+  internet, cukup sekali.
+- Awalnya aplikasi belum punya ikon (katalog aset tidak berisi `AppIcon`). Ikon kemudian dibuat sendiri dengan format
+  Icon Composer (`ios/VoiceToTodo/AppIcon.icon`): mikrofon dan centang di atas latar ungu aksen.
+  Isi `Assets.car` hasil build (dibaca dengan `xcrun assetutil --info`) berisi versi terang, gelap, dan tinted, ditambah
+  lapisan Liquid Glass. Xcode juga membuat gambar biasa `AppIcon60x60@2x.png` untuk iOS versi lama. Ikon sudah terpasang
+  di 17 Pro. Tampilannya di iOS 17 (XR) belum dilihat langsung.
+- Begitu Team dipilih di Xcode, file proyek berubah: `DEVELOPMENT_TEAM` terisi ID team user, dan Xcode mengurutkan
+  ulang isi `project.pbxproj` dan `Info.plist` tanpa mengubah isinya (dibuktikan dengan membandingkan isi yang sudah
+  diurutkan).
+
+XR dijadwalkan diuji saat dipinjam (lihat jadwal uji XR).

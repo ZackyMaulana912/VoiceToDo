@@ -7,39 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1EE1D18F233A18F8FE738017 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9357E796B1FEE3F2E57DD /* Models.swift */; };
-		119101205BE45F16847E4D80 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0A7789735474654DF82E89 /* AppStore.swift */; };
-		1D6CA9EF54606E08E69BD2A8 /* FoundationModelSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */; };
-		1980F2292EB1886301452A42 /* SpeechRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */; };
-		1003829EE7167A35120E9E39 /* Summarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E1039E779857A9A8B90D57 /* Summarizer.swift */; };
-		1A2D5FE630F9532CFDC2D9E3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBDB9C7842E063B899BD288 /* DesignTokens.swift */; };
-		103C24907FB50FDEDBC068EB /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0A04B7F2517B7B1434596E /* Components.swift */; };
-		1A5C5A38777A2801110D5281 /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DD153DC8C3BD4434C1447F /* HistoryViews.swift */; };
-		1DA4224AE62B992BFF677E03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA5740DEC99D0D9298258F /* HomeView.swift */; };
-		10639436656D84BCED8FE26F /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEC2857B84F5D4390D45FDE /* RecordingView.swift */; };
-		105847EC99A3848603A2BEA9 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */; };
-		1461E4BCF0237E6BA6F6955F /* VoiceToTodoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 233A97D03C15AD4BDF48599B /* VoiceToTodoApp.swift */; };
 		100000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* Assets.xcassets */; };
 		100000000000000000000006 /* Inter-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* Inter-Variable.ttf */; };
+		1003829EE7167A35120E9E39 /* Summarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E1039E779857A9A8B90D57 /* Summarizer.swift */; };
+		103C24907FB50FDEDBC068EB /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0A04B7F2517B7B1434596E /* Components.swift */; };
+		105847EC99A3848603A2BEA9 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */; };
+		10639436656D84BCED8FE26F /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEC2857B84F5D4390D45FDE /* RecordingView.swift */; };
+		119101205BE45F16847E4D80 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0A7789735474654DF82E89 /* AppStore.swift */; };
+		1461E4BCF0237E6BA6F6955F /* VoiceToTodoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 233A97D03C15AD4BDF48599B /* VoiceToTodoApp.swift */; };
+		1980F2292EB1886301452A42 /* SpeechRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */; };
+		1A2D5FE630F9532CFDC2D9E3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBDB9C7842E063B899BD288 /* DesignTokens.swift */; };
+		1A5C5A38777A2801110D5281 /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DD153DC8C3BD4434C1447F /* HistoryViews.swift */; };
+		1D6CA9EF54606E08E69BD2A8 /* FoundationModelSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */; };
+		1DA4224AE62B992BFF677E03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA5740DEC99D0D9298258F /* HomeView.swift */; };
+		1EE1D18F233A18F8FE738017 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9357E796B1FEE3F2E57DD /* Models.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		25A9357E796B1FEE3F2E57DD /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		2D0A7789735474654DF82E89 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
-		2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelSummarizer.swift; sourceTree = "<group>"; };
-		2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecorder.swift; sourceTree = "<group>"; };
-		24E1039E779857A9A8B90D57 /* Summarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Summarizer.swift; sourceTree = "<group>"; };
-		2BBDB9C7842E063B899BD288 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
-		2D0A04B7F2517B7B1434596E /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
-		23DD153DC8C3BD4434C1447F /* HistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViews.swift; sourceTree = "<group>"; };
-		2BDA5740DEC99D0D9298258F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		2AEC2857B84F5D4390D45FDE /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
-		2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		233A97D03C15AD4BDF48599B /* VoiceToTodoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceToTodoApp.swift; sourceTree = "<group>"; };
 		200000000000000000000005 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		200000000000000000000006 /* Inter-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Variable.ttf"; sourceTree = "<group>"; };
 		200000000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		200000000000000000000008 /* VoiceToTodo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceToTodo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		233A97D03C15AD4BDF48599B /* VoiceToTodoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceToTodoApp.swift; sourceTree = "<group>"; };
+		23DD153DC8C3BD4434C1447F /* HistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViews.swift; sourceTree = "<group>"; };
+		24E1039E779857A9A8B90D57 /* Summarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Summarizer.swift; sourceTree = "<group>"; };
+		25A9357E796B1FEE3F2E57DD /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecorder.swift; sourceTree = "<group>"; };
+		2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		2AEC2857B84F5D4390D45FDE /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		2BBDB9C7842E063B899BD288 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		2BDA5740DEC99D0D9298258F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2D0A04B7F2517B7B1434596E /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		2D0A7789735474654DF82E89 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelSummarizer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,51 +53,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4125FD80C0DE2B2AAE1122BB /* Models */ = {
+		400000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				25A9357E796B1FEE3F2E57DD /* Models.swift */,
+				400000000000000000000002 /* VoiceToTodo */,
+				400000000000000000000006 /* Products */,
 			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		461CB69D99DBE513D92A63E9 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				2D0A7789735474654DF82E89 /* AppStore.swift */,
-				2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */,
-				2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */,
-				24E1039E779857A9A8B90D57 /* Summarizer.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		420CBF74B55EE444293EF9E3 /* Support */ = {
-			isa = PBXGroup;
-			children = (
-				2BBDB9C7842E063B899BD288 /* DesignTokens.swift */,
-			);
-			path = Support;
-			sourceTree = "<group>";
-		};
-		49DAC8FE2B6FE9F1FD16DC66 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				2D0A04B7F2517B7B1434596E /* Components.swift */,
-				23DD153DC8C3BD4434C1447F /* HistoryViews.swift */,
-				2BDA5740DEC99D0D9298258F /* HomeView.swift */,
-				2AEC2857B84F5D4390D45FDE /* RecordingView.swift */,
-				2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		42A15A23C9D7A956D90DEAE3 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				200000000000000000000006 /* Inter-Variable.ttf */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		400000000000000000000002 /* VoiceToTodo */ = {
@@ -115,20 +76,59 @@
 			path = VoiceToTodo;
 			sourceTree = "<group>";
 		};
-		400000000000000000000001 = {
-			isa = PBXGroup;
-			children = (
-				400000000000000000000002 /* VoiceToTodo */,
-				400000000000000000000006 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
 		400000000000000000000006 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				200000000000000000000008 /* VoiceToTodo.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4125FD80C0DE2B2AAE1122BB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				25A9357E796B1FEE3F2E57DD /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		420CBF74B55EE444293EF9E3 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				2BBDB9C7842E063B899BD288 /* DesignTokens.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		42A15A23C9D7A956D90DEAE3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000006 /* Inter-Variable.ttf */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		461CB69D99DBE513D92A63E9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2D0A7789735474654DF82E89 /* AppStore.swift */,
+				2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */,
+				2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */,
+				24E1039E779857A9A8B90D57 /* Summarizer.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		49DAC8FE2B6FE9F1FD16DC66 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2D0A04B7F2517B7B1434596E /* Components.swift */,
+				23DD153DC8C3BD4434C1447F /* HistoryViews.swift */,
+				2BDA5740DEC99D0D9298258F /* HomeView.swift */,
+				2AEC2857B84F5D4390D45FDE /* RecordingView.swift */,
+				2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,7 +273,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C87NVSAYFP;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VoiceToTodo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -292,7 +292,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C87NVSAYFP;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VoiceToTodo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;

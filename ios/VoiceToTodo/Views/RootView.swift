@@ -10,6 +10,8 @@ struct RootView: View {
     @StateObject private var recorder = SpeechRecorder()
     @State private var screen: Screen = .home
     @State private var permissionMessage: String?
+    /// Pesan saat rekaman berhenti sendiri (telepon masuk, layar dikunci, dll.).
+    @State private var stopNotice: String?
 
     private var selectedTab: MainTab {
         switch screen {
@@ -24,6 +26,14 @@ struct RootView: View {
 
             VStack(spacing: 0) {
                 content
+                    .alert("Rekaman dihentikan", isPresented: Binding(
+                        get: { stopNotice != nil },
+                        set: { if !$0 { stopNotice = nil } }
+                    )) {
+                        Button("Oke", role: .cancel) {}
+                    } message: {
+                        Text(stopNotice ?? "")
+                    }
                 if screen != .recording {
                     BottomNavView(selected: selectedTab) { tab in
                         store.dismissResultBanner()
@@ -68,6 +78,9 @@ struct RootView: View {
                 onFinish: { audio in
                     store.finishRecording(audio)
                     screen = .home
+                    if let note = audio.stopNote {
+                        stopNotice = note + " Bagian yang sudah terekam (\(Formatters.duration(audio.duration))) tetap disimpan dan diproses."
+                    }
                 }
             )
         case .history:

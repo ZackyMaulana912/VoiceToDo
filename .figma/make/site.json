@@ -1,0 +1,10 @@
+{
+  "description": "Helps users turn Figma designs into Swift apps, making it easier to bring interface ideas to life with native iOS code.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

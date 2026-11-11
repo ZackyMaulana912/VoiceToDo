@@ -1,0 +1,38 @@
+{
+  "resolved": [
+    {
+      "family": "Inter",
+      "style": "Medium",
+      "font_style": "normal",
+      "font_weight": 500,
+      "format": "woff2",
+      "location": {
+        "type": "url",
+        "value": "https://static.figma.com/font/Inter_1"
+      }
+    },
+    {
+      "family": "Inter",
+      "style": "Regular",
+      "font_style": "normal",
+      "font_weight": 400,
+      "format": "woff2",
+      "location": {
+        "type": "url",
+        "value": "https://static.figma.com/font/Inter_1"
+      }
+    },
+    {
+      "family": "Inter",
+      "style": "Semi Bold",
+      "font_style": "normal",
+      "font_weight": 600,
+      "format": "woff2",
+      "location": {
+        "type": "url",
+        "value": "https://static.figma.com/font/Inter_1"
+      }
+    }
+  ],
+  "blocked": []
+}

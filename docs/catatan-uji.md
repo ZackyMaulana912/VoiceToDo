@@ -103,6 +103,8 @@ berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**
 | Rekaman terputus: aplikasi ditinggalkan | Sama, tetapi geser ke layar utama | belum diuji |
 | Rekaman terputus: telepon masuk | Minta orang menelepon saat merekam | belum diuji |
 | Rekaman terputus: earphone | Cabut atau sambungkan earphone/AirPods saat merekam | belum diuji |
+| Hapus to-do | Tekan lama kartu to-do (di daftar, kartu hasil, dan detail), pilih "Hapus to-do": muncul konfirmasi. Batal: to-do tetap. Hapus: to-do hilang dan tetap hilang setelah aplikasi dibuka ulang | belum diuji |
+| Hapus rekaman | Buka detail rekaman, tekan "Hapus rekaman": konfirmasi menyebut jumlah to-do. Hapus: kembali ke Riwayat, rekaman dan to-do-nya hilang. Rekaman yang sedang diproses tidak punya tombol hapus | belum diuji |
 | Bug 1: Tutup tidak menghapus rekaman lama | Putar musik/telepon yang memakai mikrofon, lalu mulai merekam sampai gagal, tekan Tutup: rekaman lama di Riwayat tetap ada | belum diuji |
 | To-do tidak dobel di Beranda | Selesaikan satu rekaman: to-do hanya tampil di kartu hasil. Pindah ke Riwayat lalu kembali: to-do muncul di daftar | belum diuji |
 | Edit ringkasan dengan Batal dan Simpan | Tekan Edit, ubah teks, tekan Batal: teks kembali seperti semula. Ubah lagi, tekan Simpan: tersimpan. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
@@ -133,3 +135,17 @@ user) dan dihapus setelah uji. Hasil: 13 dari 13 lolos.
 
 Keterbatasan: penyebab teknis di akhir pesan "Gagal menyimpan" berbahasa Inggris di Mac. Di iPhone berbahasa
 Indonesia diduga ikut bahasa HP, belum dilihat.
+
+### 2026-11-12, uji logika hapus di Mac
+
+Cara sama dengan uji sebelumnya (kode `AppStore.swift` asli, pengenal ucapan dan peringkas tiruan, folder data di
+scratchpad lalu dihapus). Hasil: 13 dari 13 lolos.
+
+| Uji | Hasil |
+|---|---|
+| Hapus to-do: hilang dari daftar dan dari rekaman asalnya, tetap hilang setelah dibuka ulang | v |
+| Hapus rekaman: rekaman dan to-do-nya hilang, rekaman lain utuh, tersimpan | v |
+| Hapus rekaman: file audionya terhapus, audio rekaman lain dan folder `Recordings` tetap ada | v |
+| Hapus rekaman: kartu hasil miliknya ikut tertutup | v |
+| Rekaman yang sedang diproses tidak bisa dihapus dan tetap selesai normal | v |
+| Penyimpanan gagal saat menghapus: muncul pesan, file audio tidak dihapus, rekaman masih ada setelah dibuka ulang | v |

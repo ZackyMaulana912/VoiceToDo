@@ -58,3 +58,33 @@ Yang terjadi selama pemasangan di 17 Pro:
   diurutkan).
 
 XR dijadwalkan diuji saat dipinjam (lihat jadwal uji XR).
+
+## Perbaikan bug kritis dari audit
+
+### 2026-11-11, bug 1: tombol "Tutup" menghapus rekaman
+
+- Masalah: kalau aplikasi gagal mulai merekam lalu pengguna menekan "Tutup", `SpeechRecorder.cancel()` menghapus file
+  berdasarkan nama file rekaman sebelumnya. Kalau belum pernah merekam sejak aplikasi dibuka, namanya kosong, dan
+  `removeItem(folder.appendingPathComponent(""))` menghapus seluruh folder `Recordings`. Ini dibuktikan di Mac dengan
+  kode yang sama: folder berisi 2 file ikut terhapus.
+- Perbaikan: nama file dikosongkan di awal `start()`, dan `cancel()` hanya menghapus kalau namanya tidak kosong.
+- Uji: build berhasil dan aplikasi terpasang di 17 Pro. Skenario gagal merekam belum dicoba langsung di HP, karena
+  butuh kondisi yang membuat perekaman gagal dimulai (misalnya mikrofon sedang dipakai aplikasi lain).
+
+### 2026-11-11, bug 2: data hilang setelah update
+
+- Masalah: kalau `voice-to-todo.json` gagal dibaca (misalnya bentuk data berubah setelah update), `AppStore.load()`
+  diam-diam mulai kosong, lalu penyimpanan berikutnya menimpa data lama. Dibuktikan di Mac: data tanpa kolom baru
+  gagal dibaca (`keyNotFound`), walaupun kolom itu punya nilai bawaan di kode.
+- Perbaikan: file yang gagal dibaca dipindah ke `voice-to-todo-cadangan-<waktu>.json`, lalu muncul pesan
+  "Data lama tidak terbaca". Kalau pemindahan gagal, aplikasi berhenti menyimpan supaya data lama tidak tertimpa.
+- Uji di iPhone 17 Pro (iOS 27.3), memakai `devicectl` untuk menyalin file data. Data asli user (2 to-do, 4 rekaman)
+  dicadangkan ke Mac dulu, lalu dikembalikan setelah uji:
+
+| Uji | Hasil |
+|---|---|
+| A. Data normal setelah update aplikasi | v terbaca seperti biasa, tidak ada file cadangan yang terbuat |
+| B. Data tanpa kolom `summary` di satu rekaman | v file dipindah ke `voice-to-todo-cadangan-1794407516.json`, isinya sama persis (md5 cocok), dan pesan muncul di layar (dilihat user) |
+| Pemulihan data asli | v md5 file di HP sama dengan cadangan; 4 file audio tetap ada |
+
+File cadangan hasil uji B (2 KB) tertinggal di HP, karena `devicectl` tidak bisa menghapus file di dalam aplikasi.

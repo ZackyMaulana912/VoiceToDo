@@ -6,6 +6,7 @@ struct RecordingView: View {
     let onFinish: (RecordedAudio) -> Void
 
     @State private var isFinishing = false
+    @State private var confirmCancel = false
 
     // Light/dark pattern copied from the Figma waveform.
     private let lightBars: Set<Int> = [0, 3, 6, 9, 12, 15, 18]
@@ -30,10 +31,21 @@ struct RecordingView: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 56) {
-                Text("Jaga layar tetap menyala saat merekam")
+                if isFinishing {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Menyimpan rekaman…")
+                    }
                     .font(.inter(13, weight: .medium))
                     .foregroundStyle(Color.mutedInk)
+                } else {
+                    Text("Jaga layar tetap menyala saat merekam")
+                        .font(.inter(13, weight: .medium))
+                        .foregroundStyle(Color.mutedInk)
+                }
                 buttons
+                    .disabled(isFinishing)
+                    .opacity(isFinishing ? 0.5 : 1)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
@@ -97,8 +109,11 @@ struct RecordingView: View {
     private var buttons: some View {
         HStack(spacing: 12) {
             Button {
-                recorder.cancel()
-                onCancel()
+                if recorder.errorMessage == nil {
+                    confirmCancel = true // rekaman sedang berjalan: tanya dulu sebelum dibuang
+                } else {
+                    discard()
+                }
             } label: {
                 Text(recorder.errorMessage == nil ? "Batal" : "Tutup")
                     .font(.inter(16, weight: .semibold))
@@ -109,6 +124,12 @@ struct RecordingView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
+            .confirmationDialog("Buang rekaman ini?", isPresented: $confirmCancel, titleVisibility: .visible) {
+                Button("Buang rekaman", role: .destructive, action: discard)
+                Button("Lanjut merekam", role: .cancel) {}
+            } message: {
+                Text("Rekaman \(Formatters.duration(recorder.elapsed)) akan dihapus dan tidak bisa dikembalikan.")
+            }
 
             if recorder.errorMessage == nil {
                 Button(action: finish) {
@@ -133,6 +154,12 @@ struct RecordingView: View {
         } catch {
             recorder.errorMessage = error.localizedDescription
         }
+    }
+
+    private func discard() {
+        guard !isFinishing else { return } // rekaman sedang disimpan: jangan dibuang di tengah jalan
+        recorder.cancel()
+        onCancel()
     }
 
     private func finish() {

@@ -88,3 +88,22 @@ XR dijadwalkan diuji saat dipinjam (lihat jadwal uji XR).
 | Pemulihan data asli | v md5 file di HP sama dengan cadangan; 4 file audio tetap ada |
 
 File cadangan hasil uji B (2 KB) tertinggal di HP, karena `devicectl` tidak bisa menghapus file di dalam aplikasi.
+
+## Uji yang menunggu HP
+
+Keputusan user 2026-11-12: uji di HP dikumpulkan di akhir. Perubahan di bawah sudah dibuktikan lewat kode (build
+berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**. Hasilnya diisi saat diuji.
+
+| Perubahan | Cara uji di 17 Pro | Hasil |
+|---|---|---|
+| Konfirmasi sebelum membuang rekaman | Rekam, tekan Batal: muncul "Buang rekaman ini?". "Lanjut merekam" tetap merekam; "Buang rekaman" kembali ke beranda | belum diuji |
+| Tanda "Menyimpan rekaman…" | Rekam, tekan Selesai: tulisan muncul sebentar dan tombol tidak bisa ditekan | belum diuji |
+| "Coba lagi" untuk transkrip 1-2 kata | Rekam satu atau dua kata sampai gagal, tekan Coba lagi: aplikasi mendengarkan ulang file audio | belum diuji |
+| Rekaman terputus: layar dikunci | Rekam 20 detik, tekan tombol kunci, buka lagi: muncul "Rekaman dihentikan", rekaman 0:20-an tersimpan dan diproses, keterangan tampil di detail | belum diuji |
+| Rekaman terputus: aplikasi ditinggalkan | Sama, tetapi geser ke layar utama | belum diuji |
+| Rekaman terputus: telepon masuk | Minta orang menelepon saat merekam | belum diuji |
+| Rekaman terputus: earphone | Cabut atau sambungkan earphone/AirPods saat merekam | belum diuji |
+| Bug 1: Tutup tidak menghapus rekaman lama | Putar musik/telepon yang memakai mikrofon, lalu mulai merekam sampai gagal, tekan Tutup: rekaman lama di Riwayat tetap ada | belum diuji |
+
+Sudah dibuktikan di Mac (2026-11-12, kode `Models.swift` asli dikompilasi untuk macOS): rekaman lama tanpa kolom
+keterangan baru (`stopNote`) tetap terbaca, dan keterangan tersimpan lalu terbaca kembali dengan benar.

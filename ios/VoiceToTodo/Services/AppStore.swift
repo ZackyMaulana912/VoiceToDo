@@ -83,13 +83,17 @@ final class AppStore: ObservableObject {
         banner = Banner(kind: .processing, recordingID: id)
 
         var transcript = current.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        if transcript.isEmpty, let name = current.audioFileName {
-            // Live transcription found nothing: try again from the saved audio file.
-            transcript = await SpeechTranscriber.transcribe(url: SpeechRecorder.folder.appendingPathComponent(name)) ?? ""
+        if Self.wordCount(transcript) < Self.minWords, let name = current.audioFileName {
+            // Transkrip langsung kosong atau terlalu pendek: dengarkan ulang dari file audio yang tersimpan.
+            // Dulu hanya dicoba saat kosong, jadi transkrip 1-2 kata membuat "Coba lagi" selalu gagal dengan hasil sama.
+            let fromFile = (await SpeechTranscriber.transcribe(url: SpeechRecorder.folder.appendingPathComponent(name)) ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if Self.wordCount(fromFile) > Self.wordCount(transcript) {
+                transcript = fromFile
+            }
         }
 
-        let wordCount = transcript.split(whereSeparator: { $0.isWhitespace }).count
-        guard wordCount >= 3 else {
+        guard Self.wordCount(transcript) >= Self.minWords else {
             update(id) { $0.status = .failed; $0.transcript = transcript; $0.summary = "Rekamanmu aman tersimpan." }
             banner = Banner(kind: .failed, recordingID: id)
             return
@@ -118,6 +122,13 @@ final class AppStore: ObservableObject {
             $0.todoIDs = newTodos.map(\.id)
         }
         banner = Banner(kind: .result, recordingID: id)
+    }
+
+    /// Transkrip di bawah jumlah kata ini dianggap terlalu pendek untuk dirangkum.
+    private static let minWords = 3
+
+    private static func wordCount(_ text: String) -> Int {
+        text.split(whereSeparator: { $0.isWhitespace }).count
     }
 
     private func update(_ id: UUID, _ change: (inout Recording) -> Void) {

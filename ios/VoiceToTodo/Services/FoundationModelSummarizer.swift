@@ -1,4 +1,5 @@
 #if canImport(FoundationModels)
+import Foundation
 import FoundationModels
 
 // Requires Xcode 26 / iOS 26 and a device with Apple Intelligence.

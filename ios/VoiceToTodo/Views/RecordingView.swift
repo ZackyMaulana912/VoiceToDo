@@ -52,13 +52,13 @@ struct RecordingView: View {
             .padding(.bottom, 24)
         }
         .task { startIfNeeded() }
-        .onChange(of: recorder.elapsed) { value in
+        .onChange(of: recorder.elapsed) { _, value in
             if value >= SpeechRecorder.maxSeconds { finish() }
         }
-        .onChange(of: recorder.interruption) { reason in
+        .onChange(of: recorder.interruption) { _, reason in
             if let reason { finish(note: reason) }
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             // Tanpa izin rekam di latar belakang, iOS memutus mikrofon saat layar dikunci atau aplikasi
             // ditinggalkan. Simpan bagian yang sudah terekam (REKAMAN_TERPUTUS) supaya tidak hilang.
             if phase == .background {

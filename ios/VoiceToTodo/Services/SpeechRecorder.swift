@@ -130,7 +130,7 @@ final class SpeechRecorder: ObservableObject {
 
     static func requestPermissions() async -> PermissionResult {
         let micGranted = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
-            AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
+            AVAudioApplication.requestRecordPermission { continuation.resume(returning: $0) }
         }
         guard micGranted else {
             return .denied("Izinkan akses Mikrofon di Pengaturan agar Voice-to-Todo bisa merekam suaramu.")

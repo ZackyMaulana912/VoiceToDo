@@ -91,6 +91,7 @@ struct DetailView: View {
 
     @State private var showTranscript = false
     @State private var pendingTodoDelete: TodoItem?
+    @State private var editingTodo: TodoItem?
     @State private var confirmDeleteRecording = false
 
     var body: some View {
@@ -130,6 +131,7 @@ struct DetailView: View {
                                 todos: store.todos(for: recording),
                                 onToggle: store.toggle,
                                 onSummaryChange: { store.updateSummary(recording.id, text: $0) },
+                                onEditTodo: { editingTodo = $0 },
                                 onDeleteTodo: { pendingTodoDelete = $0 }
                             )
                             transcript(recording)
@@ -145,6 +147,7 @@ struct DetailView: View {
                     .padding(.bottom, 16)
                 }
                 .confirmTodoDelete($pendingTodoDelete) { store.deleteTodo($0) }
+                .todoEditSheet($editingTodo) { store.editTodo($0, title: $1) }
             }
             .padding(.horizontal, 16)
             .frame(maxHeight: .infinity, alignment: .top)

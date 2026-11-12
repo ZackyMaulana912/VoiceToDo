@@ -55,6 +55,26 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    /// Batas panjang teks to-do (sama dengan versi web, lihat CLAUDE.md 5.2).
+    static let maxTodoLength = 280
+
+    /// Merapikan teks to-do dari isian: baris baru jadi spasi, spasi di ujung dibuang.
+    /// Nil bila kosong atau lebih dari `maxTodoLength`.
+    static func cleanTodoTitle(_ raw: String) -> String? {
+        let text = raw.components(separatedBy: .newlines).joined(separator: " ")
+            .trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty, text.count <= maxTodoLength else { return nil }
+        return text
+    }
+
+    func editTodo(_ id: UUID, title: String) {
+        guard let text = Self.cleanTodoTitle(title),
+              let i = todos.firstIndex(where: { $0.id == id }),
+              todos[i].title != text else { return }
+        todos[i].title = text
+        save()
+    }
+
     func deleteTodo(_ id: UUID) {
         todos.removeAll { $0.id == id }
         for i in recordings.indices {

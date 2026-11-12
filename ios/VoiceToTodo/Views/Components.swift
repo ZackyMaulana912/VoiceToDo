@@ -66,16 +66,27 @@ struct CheckboxView: View {
 }
 
 extension View {
-    /// Tekan lama sebuah to-do untuk memunculkan menu hapus. Juga bisa lewat aksi VoiceOver.
-    func todoMenu(onDelete: @escaping () -> Void) -> some View {
+    /// Tekan lama sebuah to-do untuk memunculkan menu edit dan hapus. Juga bisa lewat aksi VoiceOver.
+    func todoMenu(onEdit: @escaping () -> Void, onDelete: @escaping () -> Void) -> some View {
         self
             .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 12))
             .contextMenu {
+                Button(action: onEdit) {
+                    Label("Edit to-do", systemImage: "pencil")
+                }
                 Button(role: .destructive, action: onDelete) {
                     Label("Hapus to-do", systemImage: "trash")
                 }
             }
+            .accessibilityAction(named: "Edit to-do", onEdit)
             .accessibilityAction(named: "Hapus to-do", onDelete)
+    }
+
+    /// Lembar isian untuk mengubah teks to-do. `editing` berisi to-do yang sedang diubah.
+    func todoEditSheet(_ editing: Binding<TodoItem?>, onSave: @escaping (UUID, String) -> Void) -> some View {
+        sheet(item: editing) { item in
+            TodoFormView(heading: "Edit to-do", initialText: item.title) { onSave(item.id, $0) }
+        }
     }
 
     /// Konfirmasi sebelum to-do dihapus. `pending` berisi to-do yang menunggu jawaban.
@@ -90,6 +101,89 @@ extension View {
             Button("Batal", role: .cancel) {}
         } message: { item in
             Text("\u{201C}\(item.title)\u{201D} akan dihapus dan tidak bisa dikembalikan.")
+        }
+    }
+}
+
+/// Kartu isian satu baris teks untuk to-do (CLAUDE.md 5.7: "Edit / Tambah to-do").
+struct TodoFormView: View {
+    let heading: String
+    let initialText: String
+    let onSave: (String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    private var cleaned: String? { AppStore.cleanTodoTitle(text) }
+    private var length: Int { text.trimmingCharacters(in: .whitespacesAndNewlines).count }
+    private var tooLong: Bool { length > AppStore.maxTodoLength }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(heading)
+                .font(.inter(18, weight: .semibold))
+                .foregroundStyle(Color.ink)
+                .padding(.top, 8)
+
+            TextField("Contoh: Kirim laporan rapat ke Bu Rina", text: $text, axis: .vertical)
+                .font(.inter(16))
+                .foregroundStyle(Color.ink)
+                .lineLimit(2...6)
+                .focused($focused)
+                .padding(12)
+                .background(Color.white)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(tooLong ? Color(hex: 0xDC2626) : Color.brand, lineWidth: 1)
+                }
+                .accessibilityLabel("Teks to-do")
+
+            if tooLong {
+                Text("Maksimal \(AppStore.maxTodoLength) karakter (sekarang \(length)).")
+                    .font(.inter(13, weight: .medium))
+                    .foregroundStyle(Color(hex: 0xB91C1C))
+            }
+
+            HStack(spacing: 12) {
+                Button { dismiss() } label: {
+                    Text("Batal")
+                        .font(.inter(16, weight: .semibold))
+                        .foregroundStyle(Color.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(Color.white)
+                        .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    guard let cleaned else { return }
+                    onSave(cleaned)
+                    dismiss()
+                } label: {
+                    Text("Simpan")
+                        .font(.inter(16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(Color.brand)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+                .disabled(cleaned == nil)
+                .opacity(cleaned == nil ? 0.5 : 1)
+            }
+            .padding(.top, 4)
+        }
+        .padding(16)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Color.appBackground)
+        .presentationDetents([.medium])
+        .onAppear {
+            text = initialText
+            focused = true
         }
     }
 }
@@ -138,7 +232,8 @@ struct ResultCardView: View {
     let todos: [TodoItem]
     let onToggle: (UUID) -> Void
     let onSummaryChange: (String) -> Void
-    /// Dipanggil saat pengguna memilih "Hapus to-do" dari menu tekan lama.
+    /// Dipanggil saat pengguna memilih "Edit to-do" atau "Hapus to-do" dari menu tekan lama.
+    var onEditTodo: ((TodoItem) -> Void)? = nil
     var onDeleteTodo: ((TodoItem) -> Void)? = nil
 
     @State private var isEditing = false
@@ -205,7 +300,7 @@ struct ResultCardView: View {
                                 .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
                         }
                         .background(Color.white)
-                        .todoMenu { onDeleteTodo?(todo) }
+                        .todoMenu(onEdit: { onEditTodo?(todo) }, onDelete: { onDeleteTodo?(todo) })
                     }
                 }
             }

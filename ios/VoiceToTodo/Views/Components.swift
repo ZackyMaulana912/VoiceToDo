@@ -1,4 +1,5 @@
 import SwiftUI
+import VoiceToTodoCore
 
 struct ChipView: View {
     let title: String
@@ -10,7 +11,8 @@ struct ChipView: View {
             .font(.inter(13, weight: .medium))
             .foregroundStyle(foreground)
             .padding(.horizontal, 12)
-            .frame(height: 26)
+            .padding(.vertical, 3)
+            .frame(minHeight: 26)
             .background(background)
             .clipShape(Capsule())
     }
@@ -24,9 +26,13 @@ struct CategoryChip: View {
 }
 
 struct DueChip: View {
-    let title: String
+    let label: LabelTenggat.Hasil
     var body: some View {
-        ChipView(title: title, foreground: Color(hex: 0x475569), background: Color(hex: 0xF1F5F9))
+        if label.terlambat {
+            ChipView(title: label.teks, foreground: Color(hex: 0xB91C1C), background: Color(hex: 0xFEF2F2))
+        } else {
+            ChipView(title: label.teks, foreground: Color(hex: 0x475569), background: Color(hex: 0xF1F5F9))
+        }
     }
 }
 
@@ -85,7 +91,14 @@ extension View {
     /// Lembar isian untuk mengubah teks to-do. `editing` berisi to-do yang sedang diubah.
     func todoEditSheet(_ editing: Binding<TodoItem?>, onSave: @escaping (UUID, String) -> Void) -> some View {
         sheet(item: editing) { item in
-            TodoFormView(heading: "Edit to-do", initialText: item.title) { onSave(item.id, $0) }
+            TodoFormView(heading: "Edit to-do", initialText: item.title) { text, _ in onSave(item.id, text) }
+        }
+    }
+
+    /// Lembar isian untuk menulis to-do baru beserta kategorinya.
+    func todoAddSheet(isPresented: Binding<Bool>, onSave: @escaping (String, TodoCategory) -> Void) -> some View {
+        sheet(isPresented: isPresented) {
+            TodoFormView(heading: "Tambah to-do", initialText: "", asksCategory: true, onSave: onSave)
         }
     }
 
@@ -100,7 +113,7 @@ extension View {
             Button("Hapus to-do", role: .destructive) { onConfirm(item.id) }
             Button("Batal", role: .cancel) {}
         } message: { item in
-            Text("\u{201C}\(item.title)\u{201D} akan dihapus dan tidak bisa dikembalikan.")
+            Text("\u{201C}\(item.title)\u{201D} akan dihapus. Kamu masih bisa mengurungkannya beberapa detik setelahnya.")
         }
     }
 }
@@ -109,10 +122,13 @@ extension View {
 struct TodoFormView: View {
     let heading: String
     let initialText: String
-    let onSave: (String) -> Void
+    /// True saat menambah to-do baru: kategori dipilih sendiri. Saat edit, kategori tidak diubah.
+    var asksCategory = false
+    let onSave: (String, TodoCategory) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
+    @State private var category: TodoCategory = .rapat
     @FocusState private var focused: Bool
 
     private var cleaned: String? { AppStore.cleanTodoTitle(text) }
@@ -145,13 +161,37 @@ struct TodoFormView: View {
                     .foregroundStyle(Color(hex: 0xB91C1C))
             }
 
+            if asksCategory {
+                Text("Kategori")
+                    .font(.inter(13, weight: .medium))
+                    .foregroundStyle(Color.mutedInk)
+                HStack(spacing: 8) {
+                    ForEach(TodoCategory.allCases, id: \.self) { option in
+                        Button { category = option } label: {
+                            Text(option.title)
+                                .font(.inter(13, weight: .medium))
+                                .foregroundStyle(option.foreground)
+                                .padding(.horizontal, 16)
+                                .frame(minHeight: 44)
+                                .background(option.background)
+                                .overlay {
+                                    Capsule().stroke(option.foreground, lineWidth: category == option ? 1.5 : 0)
+                                }
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(category == option ? .isSelected : [])
+                    }
+                }
+            }
+
             HStack(spacing: 12) {
                 Button { dismiss() } label: {
                     Text("Batal")
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(Color.ink)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.white)
                         .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
                         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -160,14 +200,14 @@ struct TodoFormView: View {
 
                 Button {
                     guard let cleaned else { return }
-                    onSave(cleaned)
+                    onSave(cleaned, category)
                     dismiss()
                 } label: {
                     Text("Simpan")
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
@@ -210,7 +250,7 @@ struct TodoCardView: View {
 
                 HStack(spacing: 8) {
                     CategoryChip(category: item.category)
-                    if let due = item.due { DueChip(title: due) }
+                    if let due = item.dueLabel() { DueChip(label: due) }
                 }
 
                 Text(item.source)
@@ -290,14 +330,20 @@ struct ResultCardView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(todos) { todo in
                         HStack(alignment: .top, spacing: 4) {
-                            CheckboxView(isOn: todo.isDone, label: todo.title) { onToggle(todo.id) }
-                            Text(todo.title)
-                                .font(.inter(16))
-                                .foregroundStyle(Color.ink)
-                                .strikethrough(todo.isDone)
-                                .opacity(todo.isDone ? 0.64 : 1)
-                                .lineSpacing(5)
-                                .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
+                            CheckboxView(isOn: todo.isDone, label: todo.isDone ? "Tandai belum selesai" : "Tandai selesai") { onToggle(todo.id) }
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(todo.title)
+                                    .font(.inter(16))
+                                    .foregroundStyle(Color.ink)
+                                    .strikethrough(todo.isDone)
+                                    .opacity(todo.isDone ? 0.64 : 1)
+                                    .lineSpacing(5)
+                                // Tenggat juga tampil di kartu hasil, bukan hanya di daftar Beranda.
+                                if let due = todo.dueLabel() { DueChip(label: due) }
+                            }
+                            .padding(.top, 12)
+                            .padding(.bottom, 8)
+                            .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
                         }
                         .background(Color.white)
                         .todoMenu(onEdit: { onEditTodo?(todo) }, onDelete: { onDeleteTodo?(todo) })
@@ -336,12 +382,12 @@ struct ResultCardView: View {
     private func actionButton(title: String, icon: String?, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                if let icon { Image(icon).frame(width: 20, height: 20) }
+                if let icon { Image(icon).frame(width: 20, height: 20).accessibilityHidden(true) }
                 Text(title).font(.inter(13, weight: .medium))
             }
             .foregroundStyle(Color.brand)
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(minHeight: 48)
             .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
         }
         .buttonStyle(.plain)
@@ -363,19 +409,28 @@ struct ResultCardView: View {
 
 struct ProcessingCardView: View {
     let duration: String
+    /// Teks tahap yang sedang berjalan, atau nil bila rekaman masih menunggu giliran.
+    let stage: String?
     @State private var angle = 0.0
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
                 Image("spinner")
                     .frame(width: 24, height: 24)
+                    .accessibilityHidden(true)
                     .rotationEffect(.degrees(angle))
                     .padding(.top, 2)
-                Text("Merangkum rekaman \(duration)...")
-                    .font(.inter(16, weight: .medium))
-                    .foregroundStyle(Color.ink)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(stage ?? "Menunggu giliran...")
+                        .font(.inter(16, weight: .medium))
+                        .foregroundStyle(Color.ink)
+                    Text("Rekaman \(duration). Jangan tutup aplikasi sampai selesai.")
+                        .font(.inter(13, weight: .medium))
+                        .foregroundStyle(Color.mutedInk)
+                }
             }
             .frame(minHeight: 48, alignment: .top)
 
@@ -391,6 +446,7 @@ struct ProcessingCardView: View {
         .padding(16)
         .cardStyle()
         .onAppear {
+            guard !reduceMotion else { return } // "Kurangi gerakan": ikon dan kerangka diam
             withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) { angle = 360 }
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true }
         }
@@ -406,7 +462,7 @@ struct FailedCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
-                Image("warn").frame(width: 24, height: 24).padding(.top, 2)
+                Image("warn").frame(width: 24, height: 24).padding(.top, 2).accessibilityHidden(true)
                 Text(message)
                     .font(.inter(16, weight: .medium))
                     .foregroundStyle(Color.ink)
@@ -418,7 +474,7 @@ struct FailedCardView: View {
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
@@ -431,6 +487,45 @@ struct FailedCardView: View {
     }
 }
 
+/// Bar kecil "To-do dihapus · Urungkan" yang muncul sebentar setelah aksi yang bisa dibatalkan.
+struct UndoBar: View {
+    let offer: AppStore.UndoOffer
+    let onUndo: () -> Void
+    let onExpire: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(offer.message)
+                .font(.inter(16, weight: .medium))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: onUndo) {
+                Text("Urungkan")
+                    .font(.inter(16, weight: .semibold))
+                    .foregroundStyle(Color(hex: 0xC7D2FE))
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 8)
+        .frame(minHeight: 52)
+        .background(Color.ink)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .task(id: offer.id) {
+            // Pengguna VoiceOver butuh waktu lebih lama untuk mencapai tombolnya.
+            let voiceOver = UIAccessibility.isVoiceOverRunning
+            if voiceOver {
+                UIAccessibility.post(notification: .announcement, argument: "\(offer.message). Tombol Urungkan tersedia.")
+            }
+            try? await Task.sleep(nanoseconds: (voiceOver ? 10 : 5) * 1_000_000_000)
+            guard !Task.isCancelled else { return }
+            onExpire()
+        }
+    }
+}
+
 struct EmptyStateView: View {
     let title: String
     let message: String
@@ -439,6 +534,7 @@ struct EmptyStateView: View {
         VStack(spacing: 12) {
             Image("emptymic")
                 .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
                 .frame(width: 104, height: 104)
                 .background(Color(hex: 0xEEF2FF))
                 .clipShape(Circle())
@@ -496,7 +592,7 @@ struct BottomNavView: View {
         }
         .padding(.horizontal, 15)
         .padding(.top, 5)
-        .frame(height: 71, alignment: .top)
+        .frame(minHeight: 71, alignment: .top)
         .background(Color.white.ignoresSafeArea(edges: .bottom))
         .overlay(alignment: .top) { Rectangle().fill(Color.border).frame(height: 1) }
     }
@@ -509,6 +605,7 @@ struct BottomNavView: View {
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 24, height: 24)
+                    .accessibilityHidden(true)
                 Text(title).font(.inter(13, weight: .medium))
             }
             .foregroundStyle(isSelected ? Color.brand : Color.mutedInk)
@@ -517,6 +614,7 @@ struct BottomNavView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("tab-\(title.lowercased())")
     }
 }
 

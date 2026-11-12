@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var filter: Filter = .pending
     @State private var pendingDelete: TodoItem?
     @State private var editing: TodoItem?
+    @State private var adding = false
 
     private var visibleTodos: [TodoItem] {
         // To-do yang sudah tampil di kartu hasil tidak diulang di daftar bawahnya. Setelah kartu hasil
@@ -54,6 +55,10 @@ struct HomeView: View {
                 withAnimation(.easeInOut(duration: 0.2)) { store.deleteTodo(id) }
             }
             .todoEditSheet($editing) { store.editTodo($0, title: $1) }
+            .todoAddSheet(isPresented: $adding) { text, category in
+                filter = .pending // to-do baru selalu "Belum", jadi tampilkan segmen itu
+                withAnimation(.easeInOut(duration: 0.2)) { store.addTodo(title: text, category: category) }
+            }
 
             RecordAreaView(onRecord: onRecord)
         }
@@ -64,7 +69,7 @@ struct HomeView: View {
         if let recording = bannerRecording, let banner = store.banner {
             switch banner.kind {
             case .processing:
-                ProcessingCardView(duration: recording.durationText)
+                ProcessingCardView(duration: recording.durationText, stage: store.activeID == recording.id ? store.stage?.text : nil)
             case .failed:
                 FailedCardView(
                     message: recording.failMessage,
@@ -88,14 +93,25 @@ struct HomeView: View {
             Text("Voice-to-Todo")
                 .font(.inter(24, weight: .semibold))
                 .foregroundStyle(Color.ink)
-                .frame(height: 32, alignment: .leading)
+                .frame(minHeight: 32, alignment: .leading)
                 .padding(.top, 24)
 
-            Text("To-do kamu")
-                .font(.inter(18, weight: .semibold))
-                .foregroundStyle(Color.ink)
-                .frame(height: 28, alignment: .leading)
-                .padding(.top, 40)
+            HStack {
+                Text("To-do kamu")
+                    .font(.inter(18, weight: .semibold))
+                    .foregroundStyle(Color.ink)
+                Spacer()
+                Button { adding = true } label: {
+                    Text("+ Tambah")
+                        .font(.inter(16, weight: .semibold))
+                        .foregroundStyle(Color.brand)
+                        .frame(minWidth: 44, minHeight: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Tambah to-do")
+            }
+            .frame(minHeight: 28)
+            .padding(.top, 40)
 
             HStack(spacing: 0) {
                 ForEach(Filter.allCases, id: \.self) { option in
@@ -106,7 +122,7 @@ struct HomeView: View {
                         Text(option.rawValue)
                             .font(.inter(13, weight: .medium))
                             .foregroundStyle(filter == option ? Color.brand : Color.mutedInk)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .frame(maxWidth: .infinity, minHeight: 40) // 48 total dengan padding 4, ikut membesar bila huruf besar
                             .background(RoundedRectangle(cornerRadius: 8).fill(filter == option ? Color.white : Color.clear))
                     }
                     .buttonStyle(.plain)
@@ -114,7 +130,7 @@ struct HomeView: View {
                 }
             }
             .padding(4)
-            .frame(height: 48)
+            .frame(minHeight: 48)
             .background(Color(hex: 0xEEF2F6))
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.top, 12)

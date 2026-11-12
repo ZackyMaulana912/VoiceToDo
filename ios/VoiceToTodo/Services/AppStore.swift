@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 /// Single source of truth. Persists todos and recordings as JSON in Documents.
@@ -353,6 +354,38 @@ final class AppStore: ObservableObject {
         recordings = snapshot.recordings
         trash = snapshot.trash ?? []
         emptyTrash() // sisa hapus rekaman yang belum sempat dibuang sebelum aplikasi tertutup
+        recoverOrphanAudio()
+    }
+
+    /// File audio yang tidak dimiliki rekaman mana pun berarti aplikasi tertutup saat merekam (misalnya mati
+    /// mendadak). Rekamannya dipulihkan, bukan dibuang (prinsip "rekaman tidak boleh hilang").
+    /// Hanya dijalankan setelah data lama berhasil dibaca, supaya data yang gagal terbaca tidak dikira kosong.
+    private func recoverOrphanAudio() {
+        let folder = SpeechRecorder.folder
+        guard let names = try? FileManager.default.contentsOfDirectory(atPath: folder.path) else { return }
+        let known = Set(recordings.compactMap(\.audioFileName)).union(trash)
+        var recovered: [Recording] = []
+        for name in names.sorted() where !known.contains(name) && !name.hasPrefix(".") {
+            let url = folder.appendingPathComponent(name)
+            let created = (try? FileManager.default.attributesOfItem(atPath: url.path)[.creationDate] as? Date) ?? Date()
+            var seconds = 0
+            if let file = try? AVAudioFile(forReading: url), file.fileFormat.sampleRate > 0 {
+                seconds = Int(Double(file.length) / file.fileFormat.sampleRate)
+            }
+            recovered.append(Recording(
+                createdAt: created,
+                title: "Rekaman dipulihkan",
+                category: .ide,
+                status: .failed,
+                duration: seconds,
+                audioFileName: name,
+                stopNote: "Aplikasi tertutup saat merekam. Bagian yang sempat terekam dipulihkan.",
+                failReason: .interrupted
+            ))
+        }
+        guard !recovered.isEmpty else { return }
+        recordings = (recordings + recovered).sorted { $0.createdAt > $1.createdAt }
+        save()
     }
 
     /// True bila data berhasil ditulis ke HP.

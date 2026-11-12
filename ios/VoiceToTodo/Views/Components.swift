@@ -465,6 +465,45 @@ struct FailedCardView: View {
     }
 }
 
+/// Bar kecil "To-do dihapus · Urungkan" yang muncul sebentar setelah aksi yang bisa dibatalkan.
+struct UndoBar: View {
+    let offer: AppStore.UndoOffer
+    let onUndo: () -> Void
+    let onExpire: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(offer.message)
+                .font(.inter(16, weight: .medium))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: onUndo) {
+                Text("Urungkan")
+                    .font(.inter(16, weight: .semibold))
+                    .foregroundStyle(Color(hex: 0xC7D2FE))
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 8)
+        .frame(minHeight: 52)
+        .background(Color.ink)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .task(id: offer.id) {
+            // Pengguna VoiceOver butuh waktu lebih lama untuk mencapai tombolnya.
+            let voiceOver = UIAccessibility.isVoiceOverRunning
+            if voiceOver {
+                UIAccessibility.post(notification: .announcement, argument: "\(offer.message). Tombol Urungkan tersedia.")
+            }
+            try? await Task.sleep(nanoseconds: (voiceOver ? 10 : 5) * 1_000_000_000)
+            guard !Task.isCancelled else { return }
+            onExpire()
+        }
+    }
+}
+
 struct EmptyStateView: View {
     let title: String
     let message: String

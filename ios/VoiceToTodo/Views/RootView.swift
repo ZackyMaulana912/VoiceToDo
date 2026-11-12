@@ -26,6 +26,17 @@ struct RootView: View {
 
             VStack(spacing: 0) {
                 content
+                    .overlay(alignment: .top) {
+                        // Di atas, supaya tidak menutupi tombol rekam di bawah.
+                        if let offer = store.undoOffer, screen != .recording {
+                            UndoBar(offer: offer, onUndo: { withAnimation(.easeInOut(duration: 0.2)) { store.undo() } }) {
+                                withAnimation(.easeInOut(duration: 0.2)) { store.expireUndo(offer.id) }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                    }
                     .alert("Rekaman dihentikan", isPresented: Binding(
                         get: { stopNotice != nil },
                         set: { if !$0 { stopNotice = nil } }

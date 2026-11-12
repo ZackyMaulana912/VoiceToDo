@@ -14,4 +14,7 @@ yang sudah ada di desain (izin user 2026-11-12). Daftar ini bisa dipakai rekan t
 | Kartu gagal | Pesan sesuai penyebab (lihat kode galat di `ios/VoiceToTodo/Models/Models.swift`); tombol Coba lagi disembunyikan bila file audio tidak ada | Pengguna tahu apa yang salah dan apakah mencoba lagi ada gunanya |
 | Beranda, kartu hasil, detail | Tekan lama to-do: menu "Hapus to-do" (ikon tempat sampah), lalu konfirmasi "Hapus to-do ini?" | Figma belum punya cara menghapus to-do |
 | Detail | Tombol "Hapus rekaman" (teks merah, garis abu, di bawah isi) dan konfirmasi "Hapus rekaman ini?" yang menyebut jumlah to-do yang ikut terhapus. Tidak tampil saat rekaman sedang diproses | Figma belum punya cara menghapus rekaman |
+| Beranda | Tombol teks "+ Tambah" di kanan judul "To-do kamu" | Figma belum punya cara menambah to-do sendiri |
+| Lembar isian to-do | Lembar setengah layar: judul "Edit to-do"/"Tambah to-do", kotak teks bergaris ungu (merah bila lebih dari 280 karakter), pilihan kategori berbentuk kapsul (hanya saat menambah), tombol Batal dan Simpan | Bentuk "kartu form satu isian teks" di CLAUDE.md 5.7 belum digambar di Figma |
+| Menu tekan lama to-do | Ditambah "Edit to-do" (ikon pensil) di atas "Hapus to-do" | Satu tempat untuk mengubah dan menghapus |
 | Semua layar | Pesan "Gagal menyimpan" bila data tidak bisa ditulis ke HP | Tidak gagal diam-diam |

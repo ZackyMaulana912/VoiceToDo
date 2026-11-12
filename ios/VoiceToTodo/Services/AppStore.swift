@@ -12,6 +12,24 @@ final class AppStore: ObservableObject {
     private struct Snapshot: Codable {
         var todos: [TodoItem]
         var recordings: [Recording]
+        /// File audio dari rekaman yang dihapus, menunggu kesempatan "Urungkan" lewat. Optional supaya data lama
+        /// tetap terbaca. Dibuang saat aplikasi dibuka bila aplikasi tertutup sebelum sempat dibuang.
+        var trash: [String]?
+    }
+
+    /// Tawaran "Urungkan" yang sedang tampil.
+    struct UndoOffer: Equatable {
+        let id = UUID()
+        let message: String
+    }
+
+    /// Cara membatalkan satu aksi. Disimpan per aksi (bukan salinan seluruh data), supaya hasil rekaman lain yang
+    /// selesai diproses di antaranya tidak ikut hilang saat diurungkan.
+    private enum UndoAction {
+        case toggle(UUID)
+        case editTodo(UUID, oldTitle: String)
+        case deleteTodo(TodoItem, index: Int, owners: [(recordingID: UUID, index: Int)])
+        case deleteRecording(Recording, index: Int, todos: [(TodoItem, index: Int)])
     }
 
     @Published private(set) var todos: [TodoItem] = []
@@ -24,6 +42,11 @@ final class AppStore: ObservableObject {
 
     /// Masalah penyimpanan yang harus diketahui pengguna (data lama tidak terbaca, gagal menyimpan).
     @Published var problem: Problem?
+    @Published private(set) var undoOffer: UndoOffer?
+
+    private var undoAction: UndoAction?
+    /// File audio yang menunggu dibuang (lihat `Snapshot.trash`).
+    private var trash: [String] = []
 
     private let fileURL: URL
     /// False bila data lama tidak terbaca dan gagal diamankan; mencegah data lama tertimpa.
@@ -53,6 +76,7 @@ final class AppStore: ObservableObject {
         guard let i = todos.firstIndex(where: { $0.id == id }) else { return }
         todos[i].isDone.toggle()
         save()
+        offerUndo(todos[i].isDone ? "To-do ditandai selesai" : "To-do ditandai belum selesai", .toggle(id))
     }
 
     /// Batas panjang teks to-do (sama dengan versi web, lihat CLAUDE.md 5.2).
@@ -84,28 +108,97 @@ final class AppStore: ObservableObject {
         guard let text = Self.cleanTodoTitle(title),
               let i = todos.firstIndex(where: { $0.id == id }),
               todos[i].title != text else { return }
+        let old = todos[i].title
         todos[i].title = text
         save()
+        offerUndo("To-do diubah", .editTodo(id, oldTitle: old))
     }
 
     func deleteTodo(_ id: UUID) {
-        todos.removeAll { $0.id == id }
+        guard let index = todos.firstIndex(where: { $0.id == id }) else { return }
+        let item = todos.remove(at: index)
+        var owners: [(recordingID: UUID, index: Int)] = []
         for i in recordings.indices {
-            recordings[i].todoIDs.removeAll { $0 == id }
+            if let j = recordings[i].todoIDs.firstIndex(of: id) {
+                owners.append((recordings[i].id, j))
+                recordings[i].todoIDs.remove(at: j)
+            }
         }
         save()
+        offerUndo("To-do dihapus", .deleteTodo(item, index: index, owners: owners))
     }
 
     /// Menghapus rekaman beserta to-do dan file audionya. Rekaman yang sedang diproses tidak bisa dihapus.
     func deleteRecording(_ id: UUID) {
-        guard let rec = recording(id), rec.status != .processing else { return }
+        guard let index = recordings.firstIndex(where: { $0.id == id }), recordings[index].status != .processing else { return }
+        let rec = recordings.remove(at: index)
+        var removed: [(TodoItem, index: Int)] = []
+        for (i, todo) in todos.enumerated() where todo.recordingID == id || rec.todoIDs.contains(todo.id) {
+            removed.append((todo, i))
+        }
         todos.removeAll { $0.recordingID == id || rec.todoIDs.contains($0.id) }
-        recordings.removeAll { $0.id == id }
         if banner?.recordingID == id { banner = nil }
-        // Audio hanya dihapus bila data baru berhasil disimpan. Kalau gagal, rekaman muncul lagi saat aplikasi
-        // dibuka, jadi audionya harus masih ada.
-        guard save(), let name = rec.audioFileName, !name.isEmpty else { return }
-        try? FileManager.default.removeItem(at: SpeechRecorder.folder.appendingPathComponent(name))
+        // Audio belum dibuang: masuk "tempat sampah" dulu supaya masih bisa diurungkan. Ikut disimpan, jadi kalau
+        // aplikasi tertutup sebelum dibuang, file dibuang saat aplikasi dibuka lagi.
+        if let name = rec.audioFileName, !name.isEmpty { trash.append(name) }
+        save()
+        offerUndo("Rekaman dihapus", .deleteRecording(rec, index: index, todos: removed))
+    }
+
+    // MARK: Urungkan
+
+    /// Membatalkan aksi terakhir yang masih ditawarkan.
+    func undo() {
+        guard let action = undoAction else { return }
+        undoAction = nil
+        undoOffer = nil
+        switch action {
+        case .toggle(let id):
+            if let i = todos.firstIndex(where: { $0.id == id }) { todos[i].isDone.toggle() }
+        case .editTodo(let id, let oldTitle):
+            if let i = todos.firstIndex(where: { $0.id == id }) { todos[i].title = oldTitle }
+        case .deleteTodo(let item, let index, let owners):
+            todos.insert(item, at: min(index, todos.count))
+            for owner in owners {
+                if let i = recordings.firstIndex(where: { $0.id == owner.recordingID }) {
+                    recordings[i].todoIDs.insert(item.id, at: min(owner.index, recordings[i].todoIDs.count))
+                }
+            }
+        case .deleteRecording(let rec, let index, let removed):
+            recordings.insert(rec, at: min(index, recordings.count))
+            for (todo, i) in removed { todos.insert(todo, at: min(i, todos.count)) }
+            if let name = rec.audioFileName { trash.removeAll { $0 == name } }
+        }
+        save()
+    }
+
+    /// Dipanggil saat tawaran "Urungkan" habis waktunya. Aksinya jadi permanen.
+    func expireUndo(_ offerID: UUID) {
+        guard undoOffer?.id == offerID else { return }
+        undoAction = nil
+        undoOffer = nil
+        emptyTrash()
+    }
+
+    private func offerUndo(_ message: String, _ action: UndoAction) {
+        // Hanya aksi terakhir yang bisa diurungkan; aksi sebelumnya jadi permanen.
+        emptyTrash(keepingLatest: action)
+        undoAction = action
+        undoOffer = UndoOffer(message: message)
+    }
+
+    /// Membuang file audio di tempat sampah. `keepingLatest`: aksi baru yang sedang ditawarkan, filenya jangan dibuang.
+    private func emptyTrash(keepingLatest latest: UndoAction? = nil) {
+        var keep: String?
+        if case .deleteRecording(let rec, _, _) = latest { keep = rec.audioFileName }
+        let toDelete = trash.filter { $0 != keep }
+        guard !toDelete.isEmpty else { return }
+        trash = trash.filter { $0 == keep }
+        // Data disimpan dulu tanpa file-file ini. Kalau gagal, file tidak dibuang (dicoba lagi lain kali).
+        guard save() else { trash += toDelete; return }
+        for name in toDelete {
+            try? FileManager.default.removeItem(at: SpeechRecorder.folder.appendingPathComponent(name))
+        }
     }
 
     func updateSummary(_ recordingID: UUID, text: String) {
@@ -258,6 +351,8 @@ final class AppStore: ObservableObject {
         }
         todos = snapshot.todos
         recordings = snapshot.recordings
+        trash = snapshot.trash ?? []
+        emptyTrash() // sisa hapus rekaman yang belum sempat dibuang sebelum aplikasi tertutup
     }
 
     /// True bila data berhasil ditulis ke HP.
@@ -267,7 +362,7 @@ final class AppStore: ObservableObject {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         do {
-            let data = try encoder.encode(Snapshot(todos: todos, recordings: recordings))
+            let data = try encoder.encode(Snapshot(todos: todos, recordings: recordings, trash: trash.isEmpty ? nil : trash))
             try data.write(to: fileURL, options: .atomic)
             saveFailureShown = false
             return true

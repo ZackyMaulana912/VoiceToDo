@@ -105,6 +105,8 @@ berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**
 | Rekaman terputus: earphone | Cabut atau sambungkan earphone/AirPods saat merekam | belum diuji |
 | Hapus to-do | Tekan lama kartu to-do (di daftar, kartu hasil, dan detail), pilih "Hapus to-do": muncul konfirmasi. Batal: to-do tetap. Hapus: to-do hilang dan tetap hilang setelah aplikasi dibuka ulang | belum diuji |
 | Hapus rekaman | Buka detail rekaman, tekan "Hapus rekaman": konfirmasi menyebut jumlah to-do. Hapus: kembali ke Riwayat, rekaman dan to-do-nya hilang. Rekaman yang sedang diproses tidak punya tombol hapus | belum diuji |
+| Edit to-do | Tekan lama to-do, pilih "Edit to-do": lembar isian muncul berisi teks lama dan keyboard terbuka. Batal: tidak berubah. Simpan: teks berubah di daftar dan di kartu hasil | belum diuji |
+| Tambah to-do | Tekan "+ Tambah" di Beranda, tulis teks, pilih kategori, Simpan: to-do muncul paling atas di segmen Belum. Isian kosong atau lebih dari 280 karakter: Simpan tidak bisa ditekan | belum diuji |
 | Bug 1: Tutup tidak menghapus rekaman lama | Putar musik/telepon yang memakai mikrofon, lalu mulai merekam sampai gagal, tekan Tutup: rekaman lama di Riwayat tetap ada | belum diuji |
 | To-do tidak dobel di Beranda | Selesaikan satu rekaman: to-do hanya tampil di kartu hasil. Pindah ke Riwayat lalu kembali: to-do muncul di daftar | belum diuji |
 | Edit ringkasan dengan Batal dan Simpan | Tekan Edit, ubah teks, tekan Batal: teks kembali seperti semula. Ubah lagi, tekan Simpan: tersimpan. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
@@ -149,3 +151,19 @@ scratchpad lalu dihapus). Hasil: 13 dari 13 lolos.
 | Hapus rekaman: kartu hasil miliknya ikut tertutup | v |
 | Rekaman yang sedang diproses tidak bisa dihapus dan tetap selesai normal | v |
 | Penyimpanan gagal saat menghapus: muncul pesan, file audio tidak dihapus, rekaman masih ada setelah dibuka ulang | v |
+
+### 2026-11-12, uji logika edit dan tambah to-do di Mac
+
+Cara sama dengan uji sebelumnya. Hasil: 11 dari 11 lolos.
+
+| Uji | Hasil |
+|---|---|
+| Teks dirapikan (spasi ujung dibuang, baris baru jadi spasi); kosong ditolak; 280 karakter diterima, 281 ditolak | v |
+| Tambah: masuk paling atas dengan kategori pilihan, belum selesai, tanpa tenggat, asal "ditulis sendiri" | v |
+| Tambah: teks kosong atau terlalu panjang tidak masuk | v |
+| Edit: hanya teks yang berubah; kategori, tenggat, asal, status, dan rekaman asal tetap | v |
+| Edit: to-do tetap tampil di kartu hasil rekamannya; teks kosong dan id tak dikenal tidak merusak data | v |
+| Tersimpan dan terbaca ulang | v |
+
+Catatan: batas 280 dihitung per huruf yang terlihat (emoji dihitung satu). Versi web menghitung dengan cara
+JavaScript, jadi untuk teks berisi emoji batasnya bisa sedikit berbeda.

@@ -69,7 +69,7 @@ struct HomeView: View {
         if let recording = bannerRecording, let banner = store.banner {
             switch banner.kind {
             case .processing:
-                ProcessingCardView(duration: recording.durationText, stage: store.activeID == recording.id ? store.stage?.text : nil)
+                ProcessingCardView(duration: recording.durationText)
             case .failed:
                 FailedCardView(
                     message: recording.failMessage,
@@ -93,7 +93,7 @@ struct HomeView: View {
             Text("Voice-to-Todo")
                 .font(.inter(24, weight: .semibold))
                 .foregroundStyle(Color.ink)
-                .frame(minHeight: 32, alignment: .leading)
+                .frame(height: 32, alignment: .leading)
                 .padding(.top, 24)
 
             HStack {
@@ -110,7 +110,7 @@ struct HomeView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Tambah to-do")
             }
-            .frame(minHeight: 28)
+            .frame(height: 28)
             .padding(.top, 40)
 
             HStack(spacing: 0) {
@@ -122,7 +122,7 @@ struct HomeView: View {
                         Text(option.rawValue)
                             .font(.inter(13, weight: .medium))
                             .foregroundStyle(filter == option ? Color.brand : Color.mutedInk)
-                            .frame(maxWidth: .infinity, minHeight: 40) // 48 total dengan padding 4, ikut membesar bila huruf besar
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(RoundedRectangle(cornerRadius: 8).fill(filter == option ? Color.white : Color.clear))
                     }
                     .buttonStyle(.plain)
@@ -130,7 +130,7 @@ struct HomeView: View {
                 }
             }
             .padding(4)
-            .frame(minHeight: 48)
+            .frame(height: 48)
             .background(Color(hex: 0xEEF2F6))
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.top, 12)

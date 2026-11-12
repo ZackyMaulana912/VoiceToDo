@@ -67,6 +67,19 @@ final class AppStore: ObservableObject {
         return text
     }
 
+    /// To-do yang ditulis sendiri oleh pengguna, tidak berasal dari rekaman.
+    func addTodo(title: String, category: TodoCategory) {
+        guard let text = Self.cleanTodoTitle(title) else { return }
+        let item = TodoItem(
+            title: text,
+            category: category,
+            due: nil,
+            source: "ditulis sendiri, \(Formatters.short.string(from: Date()))"
+        )
+        todos.insert(item, at: 0)
+        save()
+    }
+
     func editTodo(_ id: UUID, title: String) {
         guard let text = Self.cleanTodoTitle(title),
               let i = todos.firstIndex(where: { $0.id == id }),

@@ -23,6 +23,7 @@
 		1EE1D18F233A18F8FE738017 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9357E796B1FEE3F2E57DD /* Models.swift */; };
 		1F0000000000000000000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2F0000000000000000000001 /* AppIcon.icon */; };
 		D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */ = {isa = PBXBuildFile; productRef = 58351E1E019275097ADCEE50 /* VoiceToTodoCore */; };
+		4E1AB20315A6B2E64D383AA1 /* ScreenAwake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		2D0A7789735474654DF82E89 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelSummarizer.swift; sourceTree = "<group>"; };
 		2F0000000000000000000001 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenAwake.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				2BBDB9C7842E063B899BD288 /* DesignTokens.swift */,
+				16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 				10639436656D84BCED8FE26F /* RecordingView.swift in Sources */,
 				105847EC99A3848603A2BEA9 /* RootView.swift in Sources */,
 				1461E4BCF0237E6BA6F6955F /* VoiceToTodoApp.swift in Sources */,
+				4E1AB20315A6B2E64D383AA1 /* ScreenAwake.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

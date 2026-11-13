@@ -189,7 +189,7 @@ final class SpeechRecorder: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.elapsed += 1 }
         }
-        UIApplication.shared.isIdleTimerDisabled = true // "Jaga layar tetap menyala"
+        ScreenAwake.set("rekam", true) // "Jaga layar tetap menyala"
     }
 
     /// Created outside the main actor so the audio thread never touches actor-isolated state.
@@ -244,7 +244,7 @@ final class SpeechRecorder: ObservableObject {
         sink.setRequest(nil)
         sink.setFile(nil)
         sink.onLevel = nil
-        UIApplication.shared.isIdleTimerDisabled = false
+        ScreenAwake.set("rekam", false)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 

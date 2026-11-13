@@ -13,6 +13,18 @@ struct SummaryResult {
     var todos: [TodoDraft]
 }
 
+/// Membuat judul, kategori, ringkasan, poin, dan to-do dari transkrip. Test memakai versi tiruan.
+protocol Summarizer: Sendable {
+    func summarize(_ transcript: String, date: Date) async throws -> SummaryResult
+}
+
+/// Peringkas yang dipakai aplikasi saat ini.
+struct DefaultSummarizer: Summarizer {
+    func summarize(_ transcript: String, date: Date) async throws -> SummaryResult {
+        await SummarizerService.summarize(transcript, date: date)
+    }
+}
+
 enum SummarizerService {
     /// Uses Apple's on-device language model when the device supports it,
     /// otherwise (or on any failure) falls back to the rule-based summarizer.

@@ -80,12 +80,23 @@ enum FailReason: String, Codable {
     case interrupted = "terganggu"
     case noSpeech = "tidak-terdengar"
     case tooShort = "terlalu-pendek"
-    case recognizerUnavailable = "pengenal-tidak-tersedia"
+    case transcriptionFailed = "transkripsi-gagal"
+    case summaryFailed = "ringkasan-gagal"
+    case lowMemory = "memori-kurang"
+    case tooHot = "terlalu-panas"
+    case modelMissing = "model-tidak-ada"
     case noAudio = "tanpa-audio"
+    /// Dari versi lama yang memakai pengenal ucapan Apple (butuh internet). Tetap ada supaya data lama terbaca.
+    case recognizerUnavailable = "pengenal-tidak-tersedia"
 
     var message: String {
         switch self {
-        case .interrupted: return "Proses terhenti karena aplikasi ditutup. Rekamanmu aman tersimpan."
+        case .interrupted: return "Proses terhenti karena aplikasi ditutup atau ditinggalkan. Rekamanmu aman tersimpan."
+        case .transcriptionFailed: return "Gagal mengubah suara jadi teks. Rekamanmu aman tersimpan."
+        case .summaryFailed: return "Gagal merangkum rekaman. Rekamanmu aman tersimpan."
+        case .lowMemory: return "Memori HP tidak cukup. Tutup aplikasi lain, lalu coba lagi."
+        case .tooHot: return "HP terlalu panas. Tunggu sebentar, lalu coba lagi."
+        case .modelMissing: return "File model AI tidak ditemukan. Pasang ulang aplikasi."
         case .noSpeech: return "Tidak ada suara yang terdengar di rekaman ini."
         case .tooShort: return "Ucapan yang tertangkap terlalu pendek untuk dirangkum (minimal 3 kata). Rekamanmu aman tersimpan."
         case .recognizerUnavailable:
@@ -95,7 +106,7 @@ enum FailReason: String, Codable {
     }
 
     /// "Coba lagi" tidak ada gunanya bila file audionya sudah tidak ada.
-    var canRetry: Bool { self != .noAudio }
+    var canRetry: Bool { self != .noAudio && self != .modelMissing }
 
     /// Pesan untuk rekaman gagal lama yang belum punya alasan.
     static let genericMessage = "Gagal memproses. Rekamanmu aman tersimpan."

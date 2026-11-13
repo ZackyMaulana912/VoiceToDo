@@ -69,7 +69,7 @@ final class AppStore: ObservableObject {
 
     init(
         transcriber: Transcriber = WhisperTranscriber(),
-        summarizer: Summarizer = DefaultSummarizer(),
+        summarizer: Summarizer = LlamaSummarizer(),
         keepScreenOn: @escaping @MainActor (Bool) -> Void = { ScreenAwake.set("proses", $0) }
     ) {
         self.transcriber = transcriber

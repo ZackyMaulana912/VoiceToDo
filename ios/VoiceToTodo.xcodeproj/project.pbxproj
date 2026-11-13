@@ -18,7 +18,6 @@
 		1980F2292EB1886301452A42 /* SpeechRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */; };
 		1A2D5FE630F9532CFDC2D9E3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBDB9C7842E063B899BD288 /* DesignTokens.swift */; };
 		1A5C5A38777A2801110D5281 /* HistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DD153DC8C3BD4434C1447F /* HistoryViews.swift */; };
-		1D6CA9EF54606E08E69BD2A8 /* FoundationModelSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */; };
 		1DA4224AE62B992BFF677E03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA5740DEC99D0D9298258F /* HomeView.swift */; };
 		1EE1D18F233A18F8FE738017 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9357E796B1FEE3F2E57DD /* Models.swift */; };
 		1F0000000000000000000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2F0000000000000000000001 /* AppIcon.icon */; };
@@ -28,6 +27,8 @@
 		CB020BD42CD718F974116641 /* Transcriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569E523999AA1793F11120BF /* Transcriber.swift */; };
 		92D990AA58949B2C6F020251 /* Processing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3289D6334CFAD69058F909F2 /* Processing.swift */; };
 		1F549D5481700551E56F3280 /* AudioSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEDC91E569B84D6C9F970CC /* AudioSink.swift */; };
+		78BFF986AC8A8D2D5F2936EA /* LlamaFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 8639464FF4CA6A2F471E3248 /* LlamaFramework */; };
+		F908B97368CF73D0315EDAC2 /* LlamaSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92ECD79BFB2D380B5C2F2D8 /* LlamaSummarizer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,12 +47,12 @@
 		2BDA5740DEC99D0D9298258F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		2D0A04B7F2517B7B1434596E /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		2D0A7789735474654DF82E89 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
-		2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelSummarizer.swift; sourceTree = "<group>"; };
 		2F0000000000000000000001 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenAwake.swift; sourceTree = "<group>"; };
 		569E523999AA1793F11120BF /* Transcriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcriber.swift; sourceTree = "<group>"; };
 		3289D6334CFAD69058F909F2 /* Processing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processing.swift; sourceTree = "<group>"; };
 		0FEDC91E569B84D6C9F970CC /* AudioSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSink.swift; sourceTree = "<group>"; };
+		F92ECD79BFB2D380B5C2F2D8 /* LlamaSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaSummarizer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 			files = (
 				D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */,
 				D790B7FCE7F6C068AB23447E /* WhisperKit in Frameworks */,
+				78BFF986AC8A8D2D5F2936EA /* LlamaFramework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,12 +130,12 @@
 			isa = PBXGroup;
 			children = (
 				2D0A7789735474654DF82E89 /* AppStore.swift */,
-				2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */,
 				2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */,
 				24E1039E779857A9A8B90D57 /* Summarizer.swift */,
 				569E523999AA1793F11120BF /* Transcriber.swift */,
 				3289D6334CFAD69058F909F2 /* Processing.swift */,
 				0FEDC91E569B84D6C9F970CC /* AudioSink.swift */,
+				F92ECD79BFB2D380B5C2F2D8 /* LlamaSummarizer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -170,6 +172,7 @@
 			packageProductDependencies = (
 				58351E1E019275097ADCEE50 /* VoiceToTodoCore */,
 				5D0F6E65866BB70248276119 /* WhisperKit */,
+				8639464FF4CA6A2F471E3248 /* LlamaFramework */,
 			);
 			productName = VoiceToTodo;
 			productReference = 200000000000000000000008 /* VoiceToTodo.app */;
@@ -202,6 +205,7 @@
 			packageReferences = (
 				4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */,
 				3FC4AE6795AA76B01DEFAB6E /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				5B377832E173FA9498A875CD /* XCLocalSwiftPackageReference "Packages/LlamaFramework" */,
 			);
 			productRefGroup = 400000000000000000000006 /* Products */;
 			projectDirPath = "";
@@ -232,7 +236,6 @@
 			files = (
 				1EE1D18F233A18F8FE738017 /* Models.swift in Sources */,
 				119101205BE45F16847E4D80 /* AppStore.swift in Sources */,
-				1D6CA9EF54606E08E69BD2A8 /* FoundationModelSummarizer.swift in Sources */,
 				1980F2292EB1886301452A42 /* SpeechRecorder.swift in Sources */,
 				1003829EE7167A35120E9E39 /* Summarizer.swift in Sources */,
 				1A2D5FE630F9532CFDC2D9E3 /* DesignTokens.swift in Sources */,
@@ -246,6 +249,7 @@
 				CB020BD42CD718F974116641 /* Transcriber.swift in Sources */,
 				92D990AA58949B2C6F020251 /* Processing.swift in Sources */,
 				1F549D5481700551E56F3280 /* AudioSink.swift in Sources */,
+				F908B97368CF73D0315EDAC2 /* LlamaSummarizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,6 +323,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 			};
 			name = Debug;
 		};
@@ -340,6 +345,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 			};
 			name = Release;
 		};
@@ -371,6 +377,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/VoiceToTodoCore;
 		};
+		5B377832E173FA9498A875CD /* XCLocalSwiftPackageReference "Packages/LlamaFramework" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/LlamaFramework;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -383,6 +393,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3FC4AE6795AA76B01DEFAB6E /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = WhisperKit;
+		};
+		8639464FF4CA6A2F471E3248 /* LlamaFramework */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5B377832E173FA9498A875CD /* XCLocalSwiftPackageReference "Packages/LlamaFramework" */;
+			productName = LlamaFramework;
 		};
 /* End XCSwiftPackageProductDependency section */
 

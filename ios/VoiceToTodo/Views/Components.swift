@@ -1,4 +1,5 @@
 import SwiftUI
+import VoiceToTodoCore
 
 struct ChipView: View {
     let title: String
@@ -24,9 +25,13 @@ struct CategoryChip: View {
 }
 
 struct DueChip: View {
-    let title: String
+    let label: LabelTenggat.Hasil
     var body: some View {
-        ChipView(title: title, foreground: Color(hex: 0x475569), background: Color(hex: 0xF1F5F9))
+        if label.terlambat {
+            ChipView(title: label.teks, foreground: Color(hex: 0xB91C1C), background: Color(hex: 0xFEF2F2))
+        } else {
+            ChipView(title: label.teks, foreground: Color(hex: 0x475569), background: Color(hex: 0xF1F5F9))
+        }
     }
 }
 
@@ -244,7 +249,7 @@ struct TodoCardView: View {
 
                 HStack(spacing: 8) {
                     CategoryChip(category: item.category)
-                    if let due = item.due { DueChip(title: due) }
+                    if let due = item.dueLabel() { DueChip(label: due) }
                 }
 
                 Text(item.source)

@@ -1,4 +1,5 @@
 import SwiftUI
+import VoiceToTodoCore
 
 enum TodoCategory: String, Codable, CaseIterable {
     case rapat = "Rapat"
@@ -28,11 +29,20 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var id = UUID()
     var title: String
     var category: TodoCategory
+    /// Frasa waktu seperti yang diucapkan ("Jumat", "minggu depan").
     var due: String?
+    /// Tanggal tenggat hasil `FrasaWaktu` (kode, bukan AI). Nil bila frasa tidak menunjuk satu hari.
+    /// Optional supaya data lama tetap terbaca.
+    var dueDate: Tanggal?
     var source: String
     var isDone = false
     var recordingID: UUID?
     var createdAt = Date()
+
+    /// Teks chip tenggat relatif terhadap hari ini.
+    func dueLabel(today: Tanggal = Tanggal(Date())) -> LabelTenggat.Hasil? {
+        LabelTenggat.buat(tanggal: dueDate, frasa: due, hariIni: today, selesai: isDone)
+    }
 }
 
 enum RecordingStatus: String, Codable {

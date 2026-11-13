@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -22,6 +22,7 @@
 		1DA4224AE62B992BFF677E03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA5740DEC99D0D9298258F /* HomeView.swift */; };
 		1EE1D18F233A18F8FE738017 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9357E796B1FEE3F2E57DD /* Models.swift */; };
 		1F0000000000000000000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2F0000000000000000000001 /* AppIcon.icon */; };
+		D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */ = {isa = PBXBuildFile; productRef = 58351E1E019275097ADCEE50 /* VoiceToTodoCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,6 +152,9 @@
 			dependencies = (
 			);
 			name = VoiceToTodo;
+			packageProductDependencies = (
+				58351E1E019275097ADCEE50 /* VoiceToTodoCore */,
+			);
 			productName = VoiceToTodo;
 			productReference = 200000000000000000000008 /* VoiceToTodo.app */;
 			productType = "com.apple.product-type.application";
@@ -178,6 +183,9 @@
 				Base,
 			);
 			mainGroup = 400000000000000000000001;
+			packageReferences = (
+				4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */,
+			);
 			productRefGroup = 400000000000000000000006 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -334,6 +342,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/VoiceToTodoCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		58351E1E019275097ADCEE50 /* VoiceToTodoCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */;
+			productName = VoiceToTodoCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 700000000000000000000001 /* Project object */;
 }

@@ -1,5 +1,6 @@
 import AVFoundation
 import SwiftUI
+import VoiceToTodoCore
 
 /// Single source of truth. Persists todos and recordings as JSON in Documents.
 @MainActor
@@ -278,11 +279,13 @@ final class AppStore: ObservableObject {
             return
         }
         let short = Formatters.short.string(from: current.createdAt)
+        let recordingDay = Tanggal(current.createdAt)
         let newTodos = result.todos.map {
             TodoItem(
                 title: $0.title,
                 category: result.category,
                 due: $0.due,
+                dueDate: $0.due.flatMap { FrasaWaktu.tanggal($0, hariRekaman: recordingDay) },
                 source: "dari \(result.title.lowercased()), \(short)",
                 recordingID: id
             )

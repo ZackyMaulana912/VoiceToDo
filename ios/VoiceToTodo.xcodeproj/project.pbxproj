@@ -29,6 +29,7 @@
 		1F549D5481700551E56F3280 /* AudioSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FEDC91E569B84D6C9F970CC /* AudioSink.swift */; };
 		78BFF986AC8A8D2D5F2936EA /* LlamaFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 8639464FF4CA6A2F471E3248 /* LlamaFramework */; };
 		F908B97368CF73D0315EDAC2 /* LlamaSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92ECD79BFB2D380B5C2F2D8 /* LlamaSummarizer.swift */; };
+		938BAC436E1ADF28E62601D5 /* UjiKelayakanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F103DF040583C49AD1077157 /* UjiKelayakanView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 		3289D6334CFAD69058F909F2 /* Processing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processing.swift; sourceTree = "<group>"; };
 		0FEDC91E569B84D6C9F970CC /* AudioSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSink.swift; sourceTree = "<group>"; };
 		F92ECD79BFB2D380B5C2F2D8 /* LlamaSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaSummarizer.swift; sourceTree = "<group>"; };
+		F103DF040583C49AD1077157 /* UjiKelayakanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UjiKelayakanView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,6 +150,7 @@
 				2BDA5740DEC99D0D9298258F /* HomeView.swift */,
 				2AEC2857B84F5D4390D45FDE /* RecordingView.swift */,
 				2ACEBCAA605A3C909C8ED8D4 /* RootView.swift */,
+				F103DF040583C49AD1077157 /* UjiKelayakanView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -250,6 +253,7 @@
 				92D990AA58949B2C6F020251 /* Processing.swift in Sources */,
 				1F549D5481700551E56F3280 /* AudioSink.swift in Sources */,
 				F908B97368CF73D0315EDAC2 /* LlamaSummarizer.swift in Sources */,
+				938BAC436E1ADF28E62601D5 /* UjiKelayakanView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,3 +5,5 @@ Packages/LlamaFramework/llama.xcframework/
 # Berkas sementara Swift Package Manager
 .build/
 .swiftpm/
+# Audio uji dibuat ulang dengan UjiKelayakan/buat-audio.sh
+UjiKelayakan/data-sintetis/*.wav

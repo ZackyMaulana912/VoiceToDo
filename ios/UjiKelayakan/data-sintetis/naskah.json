@@ -1,0 +1,58 @@
+{
+  "keterangan": "Data uji SINTETIS untuk memeriksa rangkaian proses (bukan pengganti 5 rekaman asli user di Fase 1). Naskah dan kunci jawaban to-do ditulis sebelum pengujian dan tidak dipakai untuk menyetel prompt. Audio dibuat dengan suara Damayanti (macOS) lewat buat-audio.sh. Hari rekaman dianggap Kamis, 12 November 2026.",
+  "hari_rekaman": "2026-11-12",
+  "naskah": [
+    {
+      "id": "01-rapat-panitia",
+      "kategori": "Rapat",
+      "teks": "Oke teman-teman, kita mulai rapat panitia pensi ya. Jadi untuk acara bulan depan, anggaran dari kampus sudah turun sekitar lima belas juta. Masalahnya sponsor belum ada yang pasti. Dimas, tolong kirim proposal sponsor ke tiga perusahaan paling lambat hari Jumat. Terus Rina, kamu cek lagi harga sewa sound system ke dua vendor, nanti hasilnya dibandingkan di rapat berikutnya. Untuk desain poster, Bayu harus menyelesaikan draf pertamanya besok. Selain itu kita juga perlu cari tempat parkir tambahan, tapi itu dibahas minggu depan saja. Jangan lupa notulen rapat ini diunggah ke grup hari ini. Ada pertanyaan? Kalau tidak ada, rapat kita tutup.",
+      "todo": [
+        {"teks": "Kirim proposal sponsor ke tiga perusahaan", "frasa": "Jumat", "tanggal": "2026-11-13"},
+        {"teks": "Cek harga sewa sound system ke dua vendor", "frasa": null, "tanggal": null},
+        {"teks": "Selesaikan draf pertama desain poster", "frasa": "besok", "tanggal": "2026-11-13"},
+        {"teks": "Cari tempat parkir tambahan", "frasa": "minggu depan", "tanggal": null},
+        {"teks": "Unggah notulen rapat ke grup", "frasa": "hari ini", "tanggal": "2026-11-12"}
+      ]
+    },
+    {
+      "id": "02-kuliah-basis-data",
+      "kategori": "Kuliah",
+      "teks": "Baik, hari ini kita membahas normalisasi basis data sampai bentuk normal ketiga. Bentuk normal pertama artinya setiap kolom hanya berisi satu nilai. Bentuk normal kedua menghilangkan ketergantungan parsial pada kunci gabungan. Bentuk normal ketiga menghilangkan ketergantungan transitif. Untuk tugas, kalian kerjakan latihan normalisasi di bab empat nomor satu sampai lima, dikumpulkan tanggal dua puluh lewat e-learning. Minggu depan ada kuis tentang materi hari ini dan materi minggu lalu. Satu lagi, setiap kelompok harus mengirim judul proyek akhir ke saya paling lambat hari Senin.",
+      "todo": [
+        {"teks": "Kerjakan latihan normalisasi bab empat nomor satu sampai lima", "frasa": "tanggal dua puluh", "tanggal": "2026-11-20"},
+        {"teks": "Belajar untuk kuis normalisasi", "frasa": "minggu depan", "tanggal": null},
+        {"teks": "Kirim judul proyek akhir kelompok ke dosen", "frasa": "Senin", "tanggal": "2026-11-16"}
+      ]
+    },
+    {
+      "id": "03-ide-aplikasi",
+      "kategori": "Ide",
+      "teks": "Aku kepikiran ide aplikasi buat anak kos. Jadi aplikasinya bisa mencatat patungan belanja bareng, misalnya beli galon atau sabun cuci, lalu otomatis menghitung siapa utang ke siapa. Mungkin ada pengingat kalau utangnya belum dibayar lebih dari seminggu. Fitur lain yang menarik itu jadwal piket bersama. Kayaknya aku perlu tanya ke teman-teman kos dulu, mereka mau pakai atau tidak. Nanti malam aku coba bikin sketsa tampilannya di kertas.",
+      "todo": [
+        {"teks": "Tanya teman-teman kos apakah mau memakai aplikasinya", "frasa": null, "tanggal": null},
+        {"teks": "Buat sketsa tampilan aplikasi di kertas", "frasa": "nanti malam", "tanggal": "2026-11-12"}
+      ]
+    },
+    {
+      "id": "04-obrolan-santai",
+      "kategori": "Rapat",
+      "teks": "Eh jadi gini, soal kerja kelompok RBPL itu, kemarin dosennya bilang laporan harus pakai format yang baru. Hmm terus aku sudah bagi tugas ya. Depa yang bikin diagram use case. Venerdi lanjut desain di Figma. Aku sendiri yang nulis bab pendahuluan, targetnya lusa sudah jadi. Oh iya, kita juga harus pesan ruangan buat presentasi, itu tolong dicek hari Rabu ya. Udah sih itu aja, nanti kalau ada yang bingung tanya di grup.",
+      "todo": [
+        {"teks": "Buat diagram use case", "frasa": null, "tanggal": null},
+        {"teks": "Lanjutkan desain di Figma", "frasa": null, "tanggal": null},
+        {"teks": "Tulis bab pendahuluan", "frasa": "lusa", "tanggal": "2026-11-14"},
+        {"teks": "Cek dan pesan ruangan untuk presentasi", "frasa": "Rabu", "tanggal": "2026-11-18"}
+      ]
+    },
+    {
+      "id": "05-catatan-singkat",
+      "kategori": "Ide",
+      "teks": "Catatan buat diriku sendiri. Hari ini telepon Pak Andi soal surat rekomendasi. Besok beli kertas HVS dua rim untuk cetak laporan. Terus bayar uang kas himpunan sebelum tanggal lima belas.",
+      "todo": [
+        {"teks": "Telepon Pak Andi soal surat rekomendasi", "frasa": "hari ini", "tanggal": "2026-11-12"},
+        {"teks": "Beli kertas HVS dua rim", "frasa": "besok", "tanggal": "2026-11-13"},
+        {"teks": "Bayar uang kas himpunan", "frasa": "sebelum tanggal lima belas", "tanggal": "2026-11-15"}
+      ]
+    }
+  ]
+}

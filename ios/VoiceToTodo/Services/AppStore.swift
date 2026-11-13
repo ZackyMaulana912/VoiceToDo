@@ -235,7 +235,6 @@ final class AppStore: ObservableObject {
             category: .rapat,
             status: .processing,
             duration: audio.duration,
-            transcript: audio.transcript,
             audioFileName: audio.fileName,
             stopNote: audio.stopNote
         )

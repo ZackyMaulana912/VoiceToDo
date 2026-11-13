@@ -1,0 +1,5 @@
+# File model AI diunduh dengan scripts/unduh-model.py, terlalu besar untuk git (lihat docs/model.md)
+VoiceToTodo/Model/
+# Berkas sementara Swift Package Manager
+.build/
+.swiftpm/

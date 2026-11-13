@@ -24,6 +24,8 @@
 		1F0000000000000000000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2F0000000000000000000001 /* AppIcon.icon */; };
 		D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */ = {isa = PBXBuildFile; productRef = 58351E1E019275097ADCEE50 /* VoiceToTodoCore */; };
 		4E1AB20315A6B2E64D383AA1 /* ScreenAwake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */; };
+		D790B7FCE7F6C068AB23447E /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0F6E65866BB70248276119 /* WhisperKit */; };
+		CB020BD42CD718F974116641 /* Transcriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569E523999AA1793F11120BF /* Transcriber.swift */; };
 		92D990AA58949B2C6F020251 /* Processing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3289D6334CFAD69058F909F2 /* Processing.swift */; };
 /* End PBXBuildFile section */
 
@@ -46,6 +48,7 @@
 		2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelSummarizer.swift; sourceTree = "<group>"; };
 		2F0000000000000000000001 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		16B1B4A14D7B0038B90EC1EB /* ScreenAwake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenAwake.swift; sourceTree = "<group>"; };
+		569E523999AA1793F11120BF /* Transcriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcriber.swift; sourceTree = "<group>"; };
 		3289D6334CFAD69058F909F2 /* Processing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processing.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -55,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8F229AA2CC5114A071D6BC7 /* VoiceToTodoCore in Frameworks */,
+				D790B7FCE7F6C068AB23447E /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +129,7 @@
 				2D864F5107588FB205CD3725 /* FoundationModelSummarizer.swift */,
 				2A67E15F4B18D2C245401F93 /* SpeechRecorder.swift */,
 				24E1039E779857A9A8B90D57 /* Summarizer.swift */,
+				569E523999AA1793F11120BF /* Transcriber.swift */,
 				3289D6334CFAD69058F909F2 /* Processing.swift */,
 			);
 			path = Services;
@@ -152,6 +157,7 @@
 				300000000000000000000002 /* Sources */,
 				300000000000000000000001 /* Frameworks */,
 				300000000000000000000003 /* Resources */,
+				D6B235718CDD4DE821334487 /* Salin model AI */,
 			);
 			buildRules = (
 			);
@@ -160,6 +166,7 @@
 			name = VoiceToTodo;
 			packageProductDependencies = (
 				58351E1E019275097ADCEE50 /* VoiceToTodoCore */,
+				5D0F6E65866BB70248276119 /* WhisperKit */,
 			);
 			productName = VoiceToTodo;
 			productReference = 200000000000000000000008 /* VoiceToTodo.app */;
@@ -191,6 +198,7 @@
 			mainGroup = 400000000000000000000001;
 			packageReferences = (
 				4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */,
+				3FC4AE6795AA76B01DEFAB6E /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			productRefGroup = 400000000000000000000006 /* Products */;
 			projectDirPath = "";
@@ -232,6 +240,7 @@
 				105847EC99A3848603A2BEA9 /* RootView.swift in Sources */,
 				1461E4BCF0237E6BA6F6955F /* VoiceToTodoApp.swift in Sources */,
 				4E1AB20315A6B2E64D383AA1 /* ScreenAwake.swift in Sources */,
+				CB020BD42CD718F974116641 /* Transcriber.swift in Sources */,
 				92D990AA58949B2C6F020251 /* Processing.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -305,6 +314,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 			};
 			name = Debug;
 		};
@@ -325,6 +335,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 			};
 			name = Release;
 		};
@@ -364,7 +375,42 @@
 			package = 4D469B24CB8F9EC4FCCA5F6C /* XCLocalSwiftPackageReference "Packages/VoiceToTodoCore" */;
 			productName = VoiceToTodoCore;
 		};
+		5D0F6E65866BB70248276119 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3FC4AE6795AA76B01DEFAB6E /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3FC4AE6795AA76B01DEFAB6E /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D6B235718CDD4DE821334487 /* Salin model AI */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Salin model AI";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Menyalin file model AI dari ios/VoiceToTodo/Model ke dalam aplikasi (CLAUDE.md prinsip 1: model ikut di aplikasi).\n# File model tidak ikut git; unduh dulu dengan: python3 ios/scripts/unduh-model.py\nSRC=\"$SRCROOT/VoiceToTodo/Model\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Model\"\nif [ ! -d \"$SRC/whisper\" ] || [ ! -d \"$SRC/llm\" ]; then\n  echo \"warning: File model AI belum diunduh. Jalankan: python3 ios/scripts/unduh-model.py. Tanpa model, aplikasi menampilkan 'File model AI tidak ditemukan'.\"\n  rm -rf \"$DST\"\n  exit 0\nfi\nmkdir -p \"$DST\"\nrsync -a --delete --exclude \".DS_Store\" \"$SRC/\" \"$DST/\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 	};
 	rootObject = 700000000000000000000001 /* Project object */;
 }

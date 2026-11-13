@@ -64,6 +64,18 @@ final class FrasaWaktuTests: XCTestCase {
         XCTAssertEqual(t("sebelum tanggal 20"), "2026-11-20")
     }
 
+    func testTanggalDalamKata() {
+        XCTAssertEqual(t("tanggal dua puluh"), "2026-11-20")
+        XCTAssertEqual(t("sebelum tanggal lima belas"), "2026-11-15")
+        XCTAssertEqual(t("tanggal sebelas"), "2026-12-11", "11 November sudah lewat")
+        XCTAssertEqual(t("tanggal sepuluh"), "2026-12-10")
+        XCTAssertEqual(t("tanggal dua puluh lima"), "2026-11-25")
+        XCTAssertEqual(t("tanggal tiga puluh satu"), "2026-12-31")
+        XCTAssertEqual(t("tanggal tiga"), "2026-12-03")
+        XCTAssertNil(t("tanggal empat puluh"))
+        XCTAssertNil(t("tanggal merah"))
+    }
+
     func testTanggalYangTidakAdaDiBulanItuLompatKeBulanBerikutnya() {
         let feb = Tanggal(tahun: 2026, bulan: 2, hari: 15)
         XCTAssertEqual(t("tanggal 31", feb), "2026-03-31")

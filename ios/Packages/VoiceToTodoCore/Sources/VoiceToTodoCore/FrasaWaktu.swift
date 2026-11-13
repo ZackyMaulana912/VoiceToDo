@@ -40,7 +40,7 @@ public enum FrasaWaktu {
         if disebut.count > 1 { return nil }
 
         // "tanggal 15": tanggal 15 terdekat yang belum lewat (hari rekaman dihitung belum lewat).
-        if let n = angka(f, #"\b(?:tanggal|tgl\.?)\s*(\d{1,2})\b"#), (1...31).contains(n) {
+        if let n = angka(f, #"\b(?:tanggal|tgl\.?)\s*(\d{1,2})\b"#) ?? angkaKata(f), (1...31).contains(n) {
             var tahun = rekaman.tahun
             var bulan = rekaman.bulan
             for _ in 0..<13 {
@@ -79,6 +79,25 @@ public enum FrasaWaktu {
               let m = re.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)),
               let r = Range(m.range(at: 1), in: s) else { return nil }
         return Int(s[r])
+    }
+
+    /// "tanggal dua puluh lima" -> 25. Hanya 1 sampai 31, karena itu rentang tanggal.
+    private static func angkaKata(_ s: String) -> Int? {
+        guard let r = s.range(of: #"\b(?:tanggal|tgl\.?)\s+"#, options: .regularExpression) else { return nil }
+        let kata = s[r.upperBound...].split(separator: " ").map(String.init)
+        let satuan = ["satu": 1, "dua": 2, "tiga": 3, "empat": 4, "lima": 5, "enam": 6, "tujuh": 7, "delapan": 8,
+                      "sembilan": 9]
+        guard let pertama = kata.first else { return nil }
+        if pertama == "sepuluh" { return 10 }
+        if pertama == "sebelas" { return 11 }
+        guard let a = satuan[pertama] else { return nil }
+        let kedua = kata.count > 1 ? kata[1] : ""
+        if kedua == "belas" { return 10 + a }
+        if kedua == "puluh" {
+            let ketiga = kata.count > 2 ? kata[2] : ""
+            return a * 10 + (satuan[ketiga] ?? 0)
+        }
+        return a
     }
 
     private static func jumlahHari(tahun: Int, bulan: Int) -> Int {

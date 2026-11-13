@@ -69,7 +69,7 @@ struct HomeView: View {
         if let recording = bannerRecording, let banner = store.banner {
             switch banner.kind {
             case .processing:
-                ProcessingCardView(duration: recording.durationText)
+                ProcessingCardView(duration: recording.durationText, stage: store.activeID == recording.id ? store.stage?.text : nil)
             case .failed:
                 FailedCardView(
                     message: recording.failMessage,

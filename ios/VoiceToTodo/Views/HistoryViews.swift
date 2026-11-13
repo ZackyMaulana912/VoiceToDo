@@ -48,7 +48,7 @@ struct HistoryView: View {
     private func row(_ recording: Recording) -> some View {
         let subtitle: String
         switch recording.status {
-        case .processing: subtitle = "Merangkum rekaman \(recording.durationText)..."
+        case .processing: subtitle = store.activeID == recording.id ? (store.stage?.text ?? "Memproses...") : "Menunggu giliran..."
         case .failed: subtitle = recording.failMessage
         case .done: subtitle = recording.summary.components(separatedBy: ". ").first ?? recording.summary
         }
@@ -136,7 +136,7 @@ struct DetailView: View {
                             )
                             transcript(recording)
                         case .processing:
-                            ProcessingCardView(duration: recording.durationText)
+                            ProcessingCardView(duration: recording.durationText, stage: store.activeID == recording.id ? store.stage?.text : nil)
                         case .failed:
                             FailedCardView(message: recording.failMessage, onRetry: recording.canRetry ? onRetry : nil)
                         }

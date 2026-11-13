@@ -402,6 +402,8 @@ struct ResultCardView: View {
 
 struct ProcessingCardView: View {
     let duration: String
+    /// Teks tahap yang sedang berjalan, atau nil bila rekaman masih menunggu giliran.
+    let stage: String?
     @State private var angle = 0.0
     @State private var pulse = false
 
@@ -412,9 +414,14 @@ struct ProcessingCardView: View {
                     .frame(width: 24, height: 24)
                     .rotationEffect(.degrees(angle))
                     .padding(.top, 2)
-                Text("Merangkum rekaman \(duration)...")
-                    .font(.inter(16, weight: .medium))
-                    .foregroundStyle(Color.ink)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(stage ?? "Menunggu giliran...")
+                        .font(.inter(16, weight: .medium))
+                        .foregroundStyle(Color.ink)
+                    Text("Rekaman \(duration). Jangan tutup aplikasi sampai selesai.")
+                        .font(.inter(13, weight: .medium))
+                        .foregroundStyle(Color.mutedInk)
+                }
             }
             .frame(minHeight: 48, alignment: .top)
 

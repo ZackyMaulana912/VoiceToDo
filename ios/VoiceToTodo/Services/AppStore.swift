@@ -56,7 +56,25 @@ final class AppStore: ObservableObject {
     /// Supaya pesan gagal menyimpan tidak muncul berulang-ulang; diulang lagi setelah ada penyimpanan yang berhasil.
     private var saveFailureShown = false
 
-    init() {
+    @Published private(set) var stage: Stage?
+    /// Rekaman yang sedang diproses; rekaman lain berstatus "processing" sedang menunggu giliran.
+    @Published private(set) var activeID: UUID?
+
+    private let transcriber: Transcriber
+    private let summarizer: Summarizer
+    private let keepScreenOn: @MainActor (Bool) -> Void
+    private var queue: [UUID] = []
+    private var worker: Task<Void, Never>?
+    private var generation = 0
+
+    init(
+        transcriber: Transcriber = WhisperTranscriber(),
+        summarizer: Summarizer = DefaultSummarizer(),
+        keepScreenOn: @escaping @MainActor (Bool) -> Void = { ScreenAwake.set("proses", $0) }
+    ) {
+        self.transcriber = transcriber
+        self.summarizer = summarizer
+        self.keepScreenOn = keepScreenOn
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         fileURL = docs.appendingPathComponent("voice-to-todo.json")
         load()
@@ -222,62 +240,121 @@ final class AppStore: ObservableObject {
             stopNote: audio.stopNote
         )
         recordings.insert(rec, at: 0)
-        banner = Banner(kind: .processing, recordingID: rec.id)
         save()
-        Task { await process(rec.id) }
+        enqueue(rec.id)
     }
 
     func retry(_ id: UUID) {
-        Task { await process(id) }
+        enqueue(id)
     }
 
     // MARK: Processing pipeline
 
-    private func process(_ id: UUID) async {
-        guard let current = recording(id) else { return }
-        update(id) { $0.status = .processing }
-        banner = Banner(kind: .processing, recordingID: id)
+    /// Tahap yang sedang berjalan untuk rekaman `activeID` (ditampilkan di kartu proses).
+    enum Stage: Equatable {
+        case transcribing, summarizing
 
-        var transcript = current.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        var audioMissing = false
-        var recognizerUnavailable = false
-        if Self.wordCount(transcript) < Self.minWords {
-            // Transkrip langsung kosong atau terlalu pendek: dengarkan ulang dari file audio yang tersimpan.
-            // Dulu hanya dicoba saat kosong, jadi transkrip 1-2 kata membuat "Coba lagi" selalu gagal dengan hasil sama.
-            let audioURL = current.audioFileName.map { SpeechRecorder.folder.appendingPathComponent($0) }
-            if let audioURL, FileManager.default.fileExists(atPath: audioURL.path) {
-                if SpeechTranscriber.isAvailable {
-                    let fromFile = (await SpeechTranscriber.transcribe(url: audioURL) ?? "")
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                    if Self.wordCount(fromFile) > Self.wordCount(transcript) {
-                        transcript = fromFile
-                    }
-                } else {
-                    recognizerUnavailable = true
-                }
-            } else {
-                audioMissing = true
+        var text: String {
+            switch self {
+            case .transcribing: return "Mengubah suara jadi teks..."
+            case .summarizing: return "Merangkum..."
             }
         }
+    }
+
+    /// Rekaman diproses satu per satu (CLAUDE.md 5.1); sisanya menunggu di antrean.
+    private func enqueue(_ id: UUID) {
+        guard recording(id) != nil, !queue.contains(id) else { return }
+        update(id) { $0.status = .processing; $0.failReason = nil }
+        queue.append(id)
+        if banner == nil || banner?.kind == .processing { banner = Banner(kind: .processing, recordingID: id) }
+        guard worker == nil else { return }
+        generation += 1
+        let myGeneration = generation
+        keepScreenOn(true) // proses berat hanya saat aplikasi terbuka (PROSES_DI_LATAR)
+        worker = Task { [weak self] in
+            while let self, !Task.isCancelled, let next = self.queue.first {
+                self.activeID = next
+                await self.process(next)
+                guard !Task.isCancelled else { break }
+                self.queue.removeFirst()
+            }
+            guard let self, self.generation == myGeneration else { return }
+            self.worker = nil
+            self.activeID = nil
+            self.stage = nil
+            self.keepScreenOn(false)
+        }
+    }
+
+    /// Dipanggil saat aplikasi masuk latar belakang. iOS tidak mengizinkan proses berat di latar, jadi proses
+    /// dihentikan dan rekamannya ditandai "terganggu" supaya bisa dicoba lagi (CLAUDE.md 5.1).
+    func interruptProcessing() {
+        guard let worker else { return }
+        worker.cancel()
+        self.worker = nil
+        generation += 1
+        for id in queue {
+            update(id) { $0.status = .failed; $0.failReason = .interrupted }
+        }
+        if let first = queue.first, banner?.kind == .processing { banner = Banner(kind: .failed, recordingID: first) }
+        queue.removeAll()
+        activeID = nil
+        stage = nil
+        keepScreenOn(false)
+    }
+
+    private func process(_ id: UUID) async {
+        guard let current = recording(id) else { return }
+        if banner == nil || banner?.kind == .processing { banner = Banner(kind: .processing, recordingID: id) }
+
+        // 1. Suara jadi teks, selalu dari file audio yang tersimpan.
+        stage = .transcribing
+        var transcript: String
+        let audioURL = current.audioFileName.flatMap { $0.isEmpty ? nil : SpeechRecorder.folder.appendingPathComponent($0) }
+        if let audioURL, FileManager.default.fileExists(atPath: audioURL.path) {
+            do {
+                transcript = try await transcriber.transcribe(audioURL)
+            } catch {
+                guard !Task.isCancelled else { return }
+                fail(id, (error as? ProcessingError)?.failReason ?? .transcriptionFailed, transcript: current.transcript)
+                return
+            }
+        } else {
+            // Audio tidak ada; rekaman dari versi lama mungkin masih punya transkrip.
+            transcript = current.transcript
+            if Self.wordCount(transcript) < Self.minWords {
+                fail(id, .noAudio, transcript: transcript)
+                return
+            }
+        }
+        guard !Task.isCancelled else { return }
+        transcript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let words = Self.wordCount(transcript)
         guard words >= Self.minWords else {
-            let reason: FailReason
-            if audioMissing { reason = .noAudio }
-            else if recognizerUnavailable { reason = .recognizerUnavailable }
-            else if words == 0 { reason = .noSpeech }
-            else { reason = .tooShort }
-            update(id) { $0.status = .failed; $0.failReason = reason; $0.transcript = transcript; $0.summary = "Rekamanmu aman tersimpan." }
-            banner = Banner(kind: .failed, recordingID: id)
+            fail(id, words == 0 ? .noSpeech : .tooShort, transcript: transcript)
             return
         }
 
-        let result = await SummarizerService.summarize(transcript, date: current.createdAt)
+        // 2. Ringkasan dan to-do.
+        stage = .summarizing
+        let result: SummaryResult
+        do {
+            result = try await summarizer.summarize(transcript, date: current.createdAt)
+        } catch {
+            guard !Task.isCancelled else { return }
+            fail(id, (error as? ProcessingError)?.failReason ?? .summaryFailed, transcript: transcript)
+            return
+        }
+        guard !Task.isCancelled else { return }
         // Jaga-jaga: rekaman sudah tidak ada (dihapus) saat ringkasan selesai. Jangan tambahkan to-do yatim.
         guard recording(id) != nil else {
             if banner?.recordingID == id { banner = nil }
             return
         }
+
+        // 3. Tanggal tenggat dihitung kode, bukan AI (CLAUDE.md prinsip 5).
         let short = Formatters.short.string(from: current.createdAt)
         let recordingDay = Tanggal(current.createdAt)
         let newTodos = result.todos.map {
@@ -303,6 +380,16 @@ final class AppStore: ObservableObject {
             $0.todoIDs = newTodos.map(\.id)
         }
         banner = Banner(kind: .result, recordingID: id)
+    }
+
+    private func fail(_ id: UUID, _ reason: FailReason, transcript: String) {
+        update(id) {
+            $0.status = .failed
+            $0.failReason = reason
+            $0.transcript = transcript
+            $0.summary = "Rekamanmu aman tersimpan."
+        }
+        banner = Banner(kind: .failed, recordingID: id)
     }
 
     /// Transkrip di bawah jumlah kata ini dianggap terlalu pendek untuk dirangkum.

@@ -7,6 +7,7 @@ struct RootView: View {
     }
 
     @StateObject private var store = AppStore()
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var recorder = SpeechRecorder()
     @State private var screen: Screen = .home
     @State private var permissionMessage: String?
@@ -62,6 +63,10 @@ struct RootView: View {
             }
         }
         .environmentObject(store)
+        .onChange(of: scenePhase) { _, phase in
+            // iOS tidak mengizinkan proses AI berat di latar belakang (CLAUDE.md 5.1).
+            if phase == .background { store.interruptProcessing() }
+        }
         .alert("Izin dibutuhkan", isPresented: Binding(
             get: { permissionMessage != nil },
             set: { if !$0 { permissionMessage = nil } }

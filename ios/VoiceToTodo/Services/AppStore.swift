@@ -407,7 +407,12 @@ final class AppStore: ObservableObject {
     // MARK: Persistence
 
     private func load() {
-        guard FileManager.default.fileExists(atPath: fileURL.path) else { return } // pemakaian pertama
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            // Pemakaian pertama. Tetap pulihkan rekaman yang tertinggal (misalnya rekaman pertama terputus karena
+            // aplikasi mati sebelum data sempat disimpan); tidak ada data lama yang bisa salah terbaca.
+            recoverOrphanAudio()
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         var snapshot: Snapshot
@@ -448,7 +453,7 @@ final class AppStore: ObservableObject {
 
     /// File audio yang tidak dimiliki rekaman mana pun berarti aplikasi tertutup saat merekam (misalnya mati
     /// mendadak). Rekamannya dipulihkan, bukan dibuang (prinsip "rekaman tidak boleh hilang").
-    /// Hanya dijalankan setelah data lama berhasil dibaca, supaya data yang gagal terbaca tidak dikira kosong.
+    /// Tidak dijalankan bila data lama gagal terbaca, supaya data yang rusak tidak dikira kosong.
     private func recoverOrphanAudio() {
         let folder = SpeechRecorder.folder
         guard let names = try? FileManager.default.contentsOfDirectory(atPath: folder.path) else { return }

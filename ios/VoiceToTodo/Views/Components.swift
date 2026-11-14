@@ -331,13 +331,19 @@ struct ResultCardView: View {
                     ForEach(todos) { todo in
                         HStack(alignment: .top, spacing: 4) {
                             CheckboxView(isOn: todo.isDone, label: todo.title) { onToggle(todo.id) }
-                            Text(todo.title)
-                                .font(.inter(16))
-                                .foregroundStyle(Color.ink)
-                                .strikethrough(todo.isDone)
-                                .opacity(todo.isDone ? 0.64 : 1)
-                                .lineSpacing(5)
-                                .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(todo.title)
+                                    .font(.inter(16))
+                                    .foregroundStyle(Color.ink)
+                                    .strikethrough(todo.isDone)
+                                    .opacity(todo.isDone ? 0.64 : 1)
+                                    .lineSpacing(5)
+                                // Tenggat juga tampil di kartu hasil, bukan hanya di daftar Beranda.
+                                if let due = todo.dueLabel() { DueChip(label: due) }
+                            }
+                            .padding(.top, 12)
+                            .padding(.bottom, 8)
+                            .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
                         }
                         .background(Color.white)
                         .todoMenu(onEdit: { onEditTodo?(todo) }, onDelete: { onDeleteTodo?(todo) })

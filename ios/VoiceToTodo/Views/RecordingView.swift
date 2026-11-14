@@ -129,7 +129,7 @@ struct RecordingView: View {
                 Text(recorder.errorMessage == nil ? "Batal" : "Tutup")
                     .font(.inter(16, weight: .semibold))
                     .foregroundStyle(Color.ink)
-                    .frame(width: 108, height: 56)
+                    .frame(minWidth: 108, minHeight: 56)
                     .background(Color.white)
                     .overlay { RoundedRectangle(cornerRadius: 12).stroke(Color.border, lineWidth: 1) }
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -150,7 +150,7 @@ struct RecordingView: View {
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .background(Color(hex: 0xDC2626))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

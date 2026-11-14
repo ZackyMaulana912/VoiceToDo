@@ -9,19 +9,19 @@ struct HistoryView: View {
             Text("Voice-to-Todo")
                 .font(.inter(24, weight: .semibold))
                 .foregroundStyle(Color.ink)
-                .frame(height: 32, alignment: .leading)
+                .frame(minHeight: 32, alignment: .leading)
                 .padding(.top, 24)
 
             Text("Riwayat")
                 .font(.inter(24, weight: .semibold))
                 .foregroundStyle(Color.ink)
-                .frame(height: 32, alignment: .leading)
+                .frame(minHeight: 32, alignment: .leading)
                 .padding(.top, 40)
 
             Text("Rekamanmu, sudah dirapikan.")
                 .font(.inter(16))
                 .foregroundStyle(Color.mutedInk)
-                .frame(height: 24, alignment: .leading)
+                .frame(minHeight: 24, alignment: .leading)
                 .padding(.bottom, 24)
 
             if store.recordings.isEmpty {
@@ -101,7 +101,7 @@ struct DetailView: View {
                     Text("‹  Riwayat")
                         .font(.inter(16, weight: .medium))
                         .foregroundStyle(Color.brand)
-                        .frame(height: 48, alignment: .leading)
+                        .frame(minHeight: 48, alignment: .leading)
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 12)
@@ -163,7 +163,7 @@ struct DetailView: View {
                 .font(.inter(16, weight: .semibold))
                 .foregroundStyle(Color(hex: 0xDC2626))
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(minHeight: 48)
                 .background(Color.white)
                 .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -197,7 +197,7 @@ struct DetailView: View {
                         .rotationEffect(.degrees(showTranscript ? 180 : 0))
                 }
                 .padding(.horizontal, 15)
-                .frame(height: 56)
+                .frame(minHeight: 56)
             }
             .buttonStyle(.plain)
 

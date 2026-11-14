@@ -20,7 +20,19 @@ extension Color {
 }
 
 extension Font {
+    /// Huruf Inter yang ikut membesar mengikuti ukuran teks di Pengaturan (Dynamic Type, CLAUDE.md 5.7).
+    /// Ukuran desain Figma dipakai sebagai ukuran dasar; gaya teks acuan dipilih dari ukurannya.
     static func inter(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom("Inter", fixedSize: size).weight(weight)
+        .custom("Inter", size: size, relativeTo: textStyle(for: size)).weight(weight)
+    }
+
+    private static func textStyle(for size: CGFloat) -> Font.TextStyle {
+        switch size {
+        case ..<14: return .footnote
+        case ..<17: return .body
+        case ..<20: return .headline
+        case ..<30: return .title2
+        default: return .largeTitle
+        }
     }
 }

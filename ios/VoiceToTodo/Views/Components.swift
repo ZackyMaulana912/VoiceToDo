@@ -11,7 +11,8 @@ struct ChipView: View {
             .font(.inter(13, weight: .medium))
             .foregroundStyle(foreground)
             .padding(.horizontal, 12)
-            .frame(height: 26)
+            .padding(.vertical, 3)
+            .frame(minHeight: 26)
             .background(background)
             .clipShape(Capsule())
     }
@@ -171,7 +172,7 @@ struct TodoFormView: View {
                                 .font(.inter(13, weight: .medium))
                                 .foregroundStyle(option.foreground)
                                 .padding(.horizontal, 16)
-                                .frame(height: 44)
+                                .frame(minHeight: 44)
                                 .background(option.background)
                                 .overlay {
                                     Capsule().stroke(option.foreground, lineWidth: category == option ? 1.5 : 0)
@@ -190,7 +191,7 @@ struct TodoFormView: View {
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(Color.ink)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.white)
                         .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
                         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -206,7 +207,7 @@ struct TodoFormView: View {
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
@@ -380,7 +381,7 @@ struct ResultCardView: View {
             }
             .foregroundStyle(Color.brand)
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(minHeight: 48)
             .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
         }
         .buttonStyle(.plain)
@@ -464,7 +465,7 @@ struct FailedCardView: View {
                         .font(.inter(16, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                        .frame(minHeight: 48)
                         .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
@@ -581,7 +582,7 @@ struct BottomNavView: View {
         }
         .padding(.horizontal, 15)
         .padding(.top, 5)
-        .frame(height: 71, alignment: .top)
+        .frame(minHeight: 71, alignment: .top)
         .background(Color.white.ignoresSafeArea(edges: .bottom))
         .overlay(alignment: .top) { Rectangle().fill(Color.border).frame(height: 1) }
     }

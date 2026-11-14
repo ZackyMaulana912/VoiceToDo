@@ -17,4 +17,9 @@ yang sudah ada di desain (izin user 2026-11-12). Daftar ini bisa dipakai rekan t
 | Beranda | Tombol teks "+ Tambah" di kanan judul "To-do kamu" | Figma belum punya cara menambah to-do sendiri |
 | Lembar isian to-do | Lembar setengah layar: judul "Edit to-do"/"Tambah to-do", kotak teks bergaris ungu (merah bila lebih dari 280 karakter), pilihan kategori berbentuk kapsul (hanya saat menambah), tombol Batal dan Simpan | Bentuk "kartu form satu isian teks" di CLAUDE.md 5.7 belum digambar di Figma |
 | Menu tekan lama to-do | Ditambah "Edit to-do" (ikon pensil) di atas "Hapus to-do" | Satu tempat untuk mengubah dan menghapus |
+| Semua layar | Bar gelap "To-do dihapus · Urungkan" di atas layar selama 5 detik (10 detik bila VoiceOver aktif) setelah mencentang, mengubah, atau menghapus | Kesalahan tekan bisa dibatalkan; diletakkan di atas supaya tidak menutupi tombol rekam |
+| Beranda dan detail | Kartu proses menampilkan tahap ("Mengubah suara jadi teks...", "Merangkum...", atau "Menunggu giliran...") dan "Jangan tutup aplikasi sampai selesai" | Proses AI di HP butuh waktu dan berhenti bila aplikasi ditinggalkan |
+| Kartu to-do | Chip tenggat relatif: "Hari ini", "Besok", "Lusa", nama hari, atau tanggal; merah "Terlambat · 10 Nov" bila lewat dan belum selesai | Tenggat dihitung dari frasa waktu; Figma hanya punya chip teks biasa |
+| Riwayat | Rekaman "Rekaman dipulihkan" untuk rekaman yang tertinggal saat aplikasi mati di tengah merekam | Rekaman tidak boleh hilang |
+| Semua layar | Ukuran huruf mengikuti pengaturan Ukuran Teks iPhone; tinggi tombol dan baris ikut membesar | Aksesibilitas (Dynamic Type) |
 | Semua layar | Pesan "Gagal menyimpan" bila data tidak bisa ditulis ke HP | Tidak gagal diam-diam |

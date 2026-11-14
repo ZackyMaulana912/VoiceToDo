@@ -108,6 +108,15 @@ berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**
 | Edit to-do | Tekan lama to-do, pilih "Edit to-do": lembar isian muncul berisi teks lama dan keyboard terbuka. Batal: tidak berubah. Simpan: teks berubah di daftar dan di kartu hasil | belum diuji |
 | Tambah to-do | Tekan "+ Tambah" di Beranda, tulis teks, pilih kategori, Simpan: to-do muncul paling atas di segmen Belum. Isian kosong atau lebih dari 280 karakter: Simpan tidak bisa ditekan | belum diuji |
 | Bug 1: Tutup tidak menghapus rekaman lama | Putar musik/telepon yang memakai mikrofon, lalu mulai merekam sampai gagal, tekan Tutup: rekaman lama di Riwayat tetap ada | belum diuji |
+| Urungkan | Centang, edit, hapus to-do, dan hapus rekaman: bar "Urungkan" muncul 5 detik di atas layar dan membatalkan aksinya | belum diuji |
+| Perekaman WAV dan Whisper di HP | Rekam ucapan sungguhan 1 menit, Selesai: tahap "Mengubah suara jadi teks..." lalu "Merangkum...", hasil dan to-do muncul | belum diuji |
+| Pemuatan pertama model | Catat lama proses rekaman pertama setelah aplikasi dipasang (Core ML menyiapkan model) | belum diuji |
+| Mode pesawat | Seluruh alur di atas dengan mode pesawat menyala | belum diuji |
+| Aplikasi ditinggalkan saat memproses | Saat "Merangkum...", geser ke layar utama, kembali: rekaman gagal "terganggu", Coba lagi berhasil | belum diuji |
+| Uji kelayakan Fase 1 di 17 Pro | Salin WAV ke Documents/UjiKelayakan, buka dengan `-ujiKelayakan`, ambil hasil-*.jsonl: waktu, memori, suhu | belum diuji |
+| Rekaman 10 menit | Rekam 10 menit penuh: berhenti otomatis, transkrip dipecah per bagian, waktu total dicatat | belum diuji |
+| VoiceOver dan Dynamic Type di HP | Nyalakan VoiceOver dan ukuran teks besar, coba semua layar | belum diuji |
+| Ukuran aplikasi dan pemasangan | Pasang dari Xcode (sekitar 4,4 GB), catat lama pemasangan | belum diuji |
 | To-do tidak dobel di Beranda | Selesaikan satu rekaman: to-do hanya tampil di kartu hasil. Pindah ke Riwayat lalu kembali: to-do muncul di daftar | belum diuji |
 | Edit ringkasan dengan Batal dan Simpan | Tekan Edit, ubah teks, tekan Batal: teks kembali seperti semula. Ubah lagi, tekan Simpan: tersimpan. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
 | Pesan gagal sesuai penyebab | Rekam diam saja: "Tidak ada suara yang terdengar…". Rekam satu-dua kata: "…terlalu pendek…". Tutup paksa aplikasi saat memproses lalu buka lagi: "Proses terhenti…" | belum diuji |
@@ -167,3 +176,122 @@ Cara sama dengan uji sebelumnya. Hasil: 11 dari 11 lolos.
 
 Catatan: batas 280 dihitung per huruf yang terlihat (emoji dihitung satu). Versi web menghitung dengan cara
 JavaScript, jadi untuk teks berisi emoji batasnya bisa sedikit berbeda.
+
+## Fase 1, 4, dan 5: Uji kelayakan AI (2026-11-12, di Mac dan Simulator)
+
+**Status: belum selesai.** Angka target Fase 1 (waktu, memori, suhu) hanya sah dari HP sungguhan, dan uji
+kualitas butuh 5 rekaman asli dari user. Yang di bawah ini dikerjakan tanpa HP supaya rangkaiannya terbukti jalan dan
+pilihan model punya dasar. Semua angka waktu di bagian ini **bukan** angka HP.
+
+Lingkungan: Mac Apple M5, RAM 16 GB, macOS 27.2; Simulator iPhone 17 Pro iOS 27.0.
+
+### Data uji sintetis
+
+Lima naskah berbahasa Indonesia (rapat panitia, kuliah, ide, obrolan santai, catatan singkat) dengan kunci jawaban
+to-do yang ditulis **sebelum** pengujian (`ios/UjiKelayakan/data-sintetis/naskah.json`), dibacakan suara Damayanti
+macOS (`buat-audio.sh`): 48, 42, 32, 32, dan 14 detik, ditambah gabungan kelimanya 169 detik. Suara buatan jauh lebih
+jernih daripada rekaman sungguhan, jadi hasil di bawah adalah batas atas.
+
+### Suara jadi teks (WhisperKit 1.1.1, kode dan file model yang sama dengan aplikasi)
+
+WER = persentase kata yang salah dibanding naskah (angka "15" dihitung salah untuk "lima belas").
+
+| Rekaman | base | large-v3 turbo |
+|---|---|---|
+| 01 rapat panitia | 14,9% | 5,0% |
+| 02 kuliah | 14,3% | 7,1% |
+| 03 ide | 4,4% | 0,0% |
+| 04 obrolan santai | 15,3% | 0,0% |
+| 05 catatan singkat | 30,0% | 10,0% |
+| gabungan 169 detik | 16,3% | 5,1% |
+
+- Dengan pengaturan bawaan WhisperKit, model base **kehilangan separuh awal** rekaman 04 (WER 63,9%): ambang
+  `logProbThreshold` membuang segmen yang kurang yakin tanpa pemberitahuan. Ambang itu dimatikan di aplikasi; tidak ada
+  rekaman yang memburuk.
+- **Tanpa internet terbukti:** transkripsi tetap berhasil saat jaringan proses diblokir total dengan `sandbox-exec`
+  (pada sandbox yang sama, `curl` gagal). Model dan tokenizer dimuat dari folder aplikasi.
+- Pemuatan pertama model turbo di Mac 119 detik (Core ML menyiapkan model untuk perangkat), berikutnya 1 sampai 6
+  detik. Di HP kemungkinan juga lambat sekali di awal; **belum diukur di HP**.
+
+### Ringkasan dan to-do (llama.cpp b12291, prompt dan grammar yang sama dengan aplikasi)
+
+Masukan: transkrip turbo dari rekaman 01 sampai 05 (17 to-do di kunci jawaban). Kecocokan to-do dinilai manual,
+karena penilai otomatis menganggap "bab 4" berbeda dari "bab empat".
+
+| Model | To-do ditemukan | To-do karangan per rekaman | Kategori benar | JSON tidak valid | Waktu rata-rata (Mac) |
+|---|---|---|---|---|---|
+| Qwen3-4B-Instruct-2507 Q4_K_M | 15/17 (88%) | 0,2 | 5/5 | 0 | 9,5 s |
+| Qwen3-1.7B Q4_K_M | 16/17 (94%) | 0,6 | 4/5 | 0 | 6,1 s |
+| Gemma 3 1B Q4_K_M | sekitar 6/17 | 0,6 | 3/5 | 0 | 6,3 s |
+
+- Percobaan pertama memberi 0 to-do untuk kedua Qwen. Penyebab: grammar hanya mengizinkan 2 spasi, padahal model
+  menulis JSON berindentasi. Diperbaiki (batas 16) dan diberi unit test; angka di atas dari setelah perbaikan.
+- Transkrip panjang (gabungan, 355 kata): sekali jalan hanya 8/17 to-do (4B). Dengan pemecahan per 250 kata: 14/17,
+  waktu Mac 39 detik.
+- Skenario XR (transkrip base lalu Qwen3-1.7B): 9/17 menurut penilai otomatis yang ketat.
+- Frasa waktu yang disalin model diubah jadi tanggal oleh kode; frasa yang tidak ada di transkrip dibuang.
+
+### Rangkaian lengkap di dalam aplikasi (Simulator, mode `-ujiKelayakan`)
+
+Kelima rekaman diproses aplikasi sungguhan tanpa kegagalan: Whisper turbo lalu Qwen3-1.7B (Simulator tidak punya
+GPU, jadi aplikasi memilih model kecil sesuai rancangan). Waktu per rekaman 79 sampai 139 detik di CPU Mac; memori
+puncak menurut Simulator 1.461 MB. **Angka ini tidak berlaku untuk HP.**
+
+Masalah yang ditemukan dan diperbaiki lewat Simulator: aplikasi langsung tertutup saat dibuka karena pengaturan
+`LD_RUNPATH_SEARCH_PATHS` tidak ada di proyek, sehingga llama.cpp tidak ditemukan. Kesalahan yang sama akan terjadi di
+HP.
+
+### Angka target Fase 1
+
+| Ukuran | Target 17 Pro | Hasil |
+|---|---|---|
+| Waktu proses rekaman 10 menit | paling lama 1,5 menit | belum diukur di HP |
+| Ditutup paksa karena memori (5 kali berturut) | 0 | belum diukur di HP |
+| Suhu mencapai kritis | tidak pernah | belum diukur di HP |
+| To-do ditemukan | minimal 70% | 88% (4B, Mac, audio sintetis) |
+| To-do karangan per rekaman | paling banyak 1 | 0,2 (4B, Mac, audio sintetis) |
+| JSON tidak valid setelah 1 kali coba ulang | 0 | 0 (Mac) |
+
+## Fase 2 dan 3: logika inti dan perekam (2026-11-12, di Mac)
+
+- Paket `VoiceToTodoCore` (frasa waktu jadi tanggal, label tenggat, validasi hasil AI, pemecahan transkrip): 39 unit
+  test lolos (`swift test`). Setiap baris tabel CLAUDE.md 5.5 punya test, termasuk pergantian bulan, tahun, dan tahun
+  kabisat, serta tanggal yang diucapkan dengan kata ("tanggal dua puluh").
+- Uji regresi logika aplikasi `ios/UjiLogika` (kode `AppStore`, `Models`, `Processing`, `AudioSink` asli lewat
+  symlink, dengan pengenal suara dan peringkas tiruan): 52 uji lolos, mencakup antrean satu per satu, aplikasi
+  ditinggalkan saat memproses, rekaman yang masuk saat aplikasi di latar belakang, kode galat per penyebab, hapus,
+  edit, tambah, Urungkan, rekaman yatim (termasuk pada pemakaian pertama), data lama, data rusak, gagal menyimpan,
+  dan konversi audio. Jalankan: `cd ios/UjiLogika && CFFIXED_USER_HOME=$(mktemp -d) swift run`.
+- Perekam (`AudioSink`, kode asli): suara 48 kHz dan 44,1 kHz diubah menjadi WAV 16 kHz mono 16-bit, panjang tepat
+  (selisih 6 sampel), nada 440 Hz tetap (440,005 Hz), tanpa lonjakan di batas potongan. Ucapan 169 detik yang dilewatkan
+  perekam ditranskripsi dengan WER sama persis (5,1%) dengan file aslinya.
+
+## Fase 6 dan 7: Tampilan dan rangkaian lengkap (2026-11-12, Simulator iPhone 17 Pro iOS 27.0)
+
+Uji UI otomatis (`ios/VoiceToTodoUITests`) menjalankan aplikasi sungguhan dan mengetuk layar seperti pengguna.
+Putaran terakhir dengan kode final: **3 lolos, 1 dilewati**.
+
+| Uji | Hasil | Isi |
+|---|---|---|
+| Alur to-do tanpa rekaman | v lolos (39 s) | Beranda kosong, Simpan mati saat isian kosong, tambah dua to-do, centang lalu Urungkan, edit lewat tekan lama, hapus dengan konfirmasi lalu Urungkan, segmen Selesai, Riwayat kosong |
+| Proses rekaman sampai to-do | v lolos (151 s) | Rekaman yang tertinggal dipulihkan, Coba lagi, tahap "Mengubah suara jadi teks...", Whisper turbo dan Qwen3-1.7B sungguhan membuat ringkasan dan 4 to-do bertenggat, judul Riwayat berganti, hapus rekaman dengan konfirmasi, Urungkan mengembalikannya |
+| Ukuran huruf besar | v lolos (30 s) | Tangkapan layar Beranda dan lembar Tambah pada ukuran XL dan Aksesibilitas L: teks membesar dan terlipat tanpa terpotong |
+| Layar perekam dan Batal | dilewati | Simulator di Mac ini tidak bisa memberi masukan mikrofon. Dibuktikan dengan program terkecil yang hanya meminta `AVAudioEngine.inputNode`: ikut berhenti paksa (`Abort trap`) di Simulator yang sama, jadi bukan bug aplikasi. Harus diuji di HP |
+
+Masalah yang ditemukan lewat uji ini dan sudah diperbaiki:
+
+- Segmen Belum/Selesai melar setinggi sekitar 100 pt setelah tinggi baris dibuat fleksibel untuk huruf besar.
+- Rekaman yang tertinggal tidak dipulihkan bila aplikasi baru pertama kali dipakai (file data belum ada).
+- Tombol centang di kartu hasil dibacakan VoiceOver sebagai judul to-do, bukan "Tandai selesai".
+- Pesan hapus masih menulis "tidak bisa dikembalikan" padahal sudah ada Urungkan.
+- Tenggat tidak tampil di kartu hasil.
+
+Ditemukan saat audit kode (bukan oleh uji): rekaman yang disimpan karena layar dikunci bisa mulai diproses AI saat
+aplikasi sudah di latar belakang. Sekarang rekaman itu menunggu dan diproses saat aplikasi dibuka lagi (ada uji
+regresinya).
+
+Catatan kualitas dari uji ini (Qwen3-1.7B di Simulator): "nanti hasilnya dibandingkan" disalin model sebagai frasa
+"nanti", lalu sesuai aturan 5.5 menjadi tenggat "Hari ini". Model 4B di Mac tidak melakukan kesalahan ini.
+
+**Syarat Fase 7 belum terpenuhi**: masih ada BELUM_DIUJI (angka HP, XR, rekaman asli), jadi Fase 7 di HP belum
+dimulai.

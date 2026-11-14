@@ -1,0 +1,32 @@
+// Gambar 1. Use Case Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12)
+digraph usecase {
+  rankdir=LR; nodesep=0.12; ranksep=1.2; fontname="Helvetica"; node [fontname="Helvetica", fontsize=12]; edge [fontname="Helvetica", fontsize=10];
+  pengguna [ordering=out, shape=none, label=<<table border="0" cellborder="0"><tr><td><font point-size="34">&#x1F464;</font></td></tr><tr><td>Pengguna</td></tr></table>>];
+  subgraph cluster_app {
+    label="Aplikasi Voice-to-Todo di iPhone (tanpa internet)"; style=rounded; color="#4f46e5"; fontcolor="#4f46e5";
+    node [shape=ellipse, style=filled, fillcolor="#eef2ff", color="#4338ca"];
+    rekam [label="Merekam suara\n(maks. 10 menit)"];
+    batal [label="Membatalkan rekaman"];
+    proses [label="Memproses rekaman\n(suara jadi teks, ringkasan, to-do)"];
+    hasil [label="Melihat ringkasan, poin,\ndan to-do"];
+    centang [label="Mencentang to-do"];
+    tambah [label="Menambah to-do"];
+    ubah [label="Mengubah to-do"];
+    hapus [label="Menghapus to-do"];
+    urung [label="Mengurungkan aksi"];
+    riwayat [label="Melihat riwayat rekaman"];
+    detail [label="Melihat detail\ndan transkrip"];
+    ringkas [label="Mengubah ringkasan"];
+    salin [label="Menyalin hasil"];
+    hapusrek [label="Menghapus rekaman"];
+    coba [label="Mencoba lagi\nrekaman yang gagal"];
+  }
+  // Satu kolom kasus penggunaan, urut seperti alur pemakaian; "Memproses rekaman" di kolom kanan.
+  pengguna -> {rekam batal hasil centang tambah ubah hapus urung riwayat detail ringkas salin hapusrek coba} [arrowhead=none];
+  rekam -> proses [style=dashed, label="«include»"];
+  coba -> proses [style=dashed, label="«include»"];
+  batal -> rekam [style=dashed, label="«extend»", constraint=false];
+  urung -> centang [style=dashed, label="«extend»", constraint=false];
+  urung -> hapus [style=dashed, label="«extend»", constraint=false];
+  urung -> hapusrek [style=dashed, label="«extend»", constraint=false];
+}

@@ -376,7 +376,7 @@ struct ResultCardView: View {
     private func actionButton(title: String, icon: String?, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                if let icon { Image(icon).frame(width: 20, height: 20) }
+                if let icon { Image(icon).frame(width: 20, height: 20).accessibilityHidden(true) }
                 Text(title).font(.inter(13, weight: .medium))
             }
             .foregroundStyle(Color.brand)
@@ -414,6 +414,7 @@ struct ProcessingCardView: View {
             HStack(alignment: .top, spacing: 12) {
                 Image("spinner")
                     .frame(width: 24, height: 24)
+                    .accessibilityHidden(true)
                     .rotationEffect(.degrees(angle))
                     .padding(.top, 2)
                 VStack(alignment: .leading, spacing: 4) {
@@ -455,7 +456,7 @@ struct FailedCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top, spacing: 12) {
-                Image("warn").frame(width: 24, height: 24).padding(.top, 2)
+                Image("warn").frame(width: 24, height: 24).padding(.top, 2).accessibilityHidden(true)
                 Text(message)
                     .font(.inter(16, weight: .medium))
                     .foregroundStyle(Color.ink)
@@ -527,6 +528,7 @@ struct EmptyStateView: View {
         VStack(spacing: 12) {
             Image("emptymic")
                 .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
                 .frame(width: 104, height: 104)
                 .background(Color(hex: 0xEEF2FF))
                 .clipShape(Circle())
@@ -597,6 +599,7 @@ struct BottomNavView: View {
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 24, height: 24)
+                    .accessibilityHidden(true)
                 Text(title).font(.inter(13, weight: .medium))
             }
             .foregroundStyle(isSelected ? Color.brand : Color.mutedInk)

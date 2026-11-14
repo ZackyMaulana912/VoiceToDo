@@ -83,6 +83,7 @@ struct RecordingView: View {
                 .font(.inter(48, weight: .semibold))
                 .monospacedDigit()
                 .foregroundStyle(Color.ink)
+                .accessibilityLabel("Durasi rekaman \(Formatters.duration(recorder.elapsed))")
 
             waveform
                 .padding(.top, 24)
@@ -109,7 +110,7 @@ struct RecordingView: View {
 
     private func errorView(_ message: String) -> some View {
         VStack(spacing: 12) {
-            Image("warn").frame(width: 24, height: 24)
+            Image("warn").frame(width: 24, height: 24).accessibilityHidden(true)
             Text(message)
                 .font(.inter(16))
                 .foregroundStyle(Color.ink)
@@ -146,7 +147,7 @@ struct RecordingView: View {
             if recorder.errorMessage == nil {
                 Button { finish() } label: {
                     HStack(spacing: 10) {
-                        Image("stop").frame(width: 20, height: 20)
+                        Image("stop").frame(width: 20, height: 20).accessibilityHidden(true)
                         Text("Selesai").font(.inter(16, weight: .semibold))
                     }
                     .foregroundStyle(.white)

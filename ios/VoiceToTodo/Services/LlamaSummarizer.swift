@@ -14,10 +14,14 @@ struct LlamaSummarizer: Summarizer {
     var modelOverride: String? = nil
 
     func summarize(_ transcript: String, date: Date) async throws -> SummaryResult {
-        guard let file = Self.chooseModel(override: modelOverride) else { throw ProcessingError.modelMissing }
-        let sizeMB = ((try? FileManager.default.attributesOfItem(atPath: file.path)[.size] as? Int) ?? 0) / 1_048_576
-        // Perkiraan: bobot model + cache konteks + kerja (BELUM_DIUJI di HP; diukur di Fase 1).
-        try DeviceCheck.ensureReady(neededMB: sizeMB + 700)
+        let candidates = Self.candidates(override: modelOverride)
+        guard let smallest = candidates.last else { throw ProcessingError.modelMissing }
+        // Model yang diutamakan dipakai bila memorinya cukup; kalau tidak, turun ke model yang lebih kecil
+        // sebelum menyerah dengan "memori-kurang".
+        guard let file = candidates.first(where: { (try? DeviceCheck.ensureReady(neededMB: Self.neededMB($0))) != nil }) else {
+            try DeviceCheck.ensureReady(neededMB: Self.neededMB(smallest)) // melempar terlalu-panas atau memori-kurang
+            throw ProcessingError.lowMemory
+        }
 
         let stop = StopFlag()
         return try await withTaskCancellationHandler {
@@ -29,12 +33,17 @@ struct LlamaSummarizer: Summarizer {
         }
     }
 
-    /// Model terbesar yang ada di aplikasi dan cocok untuk HP ini. HP tanpa GPU yang didukung llama.cpp
-    /// (lebih lama dari A14, misalnya XR) memakai model kecil karena berjalan di CPU.
-    static func chooseModel(override: String? = nil) -> URL? {
-        guard let root = ModelFiles.root?.appendingPathComponent("llm") else { return nil }
+    /// Model yang ada di aplikasi, urut dari yang diutamakan untuk HP ini. HP tanpa GPU yang didukung llama.cpp
+    /// (lebih lama dari A14, misalnya XR) mengutamakan model kecil karena berjalan di CPU.
+    static func candidates(override: String? = nil) -> [URL] {
+        guard let root = ModelFiles.root?.appendingPathComponent("llm") else { return [] }
         let names = override.map { [$0] } ?? (Self.gpuSupported ? models : Array(models.reversed()))
-        return names.map { root.appendingPathComponent($0) }.first { FileManager.default.fileExists(atPath: $0.path) }
+        return names.map { root.appendingPathComponent($0) }.filter { FileManager.default.fileExists(atPath: $0.path) }
+    }
+
+    /// Perkiraan memori: bobot model + cache konteks + kerja (BELUM_DIUJI di HP; diukur di Fase 1).
+    static func neededMB(_ file: URL) -> Int {
+        ((try? FileManager.default.attributesOfItem(atPath: file.path)[.size] as? Int) ?? 0) / 1_048_576 + 700
     }
 
     /// llama.cpp butuh GPU keluarga Apple7 (A14, "iPhone13,x") ke atas untuk Metal. Simulator memakai CPU.

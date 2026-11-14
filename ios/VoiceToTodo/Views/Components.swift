@@ -113,7 +113,7 @@ extension View {
             Button("Hapus to-do", role: .destructive) { onConfirm(item.id) }
             Button("Batal", role: .cancel) {}
         } message: { item in
-            Text("\u{201C}\(item.title)\u{201D} akan dihapus dan tidak bisa dikembalikan.")
+            Text("\u{201C}\(item.title)\u{201D} akan dihapus. Kamu masih bisa mengurungkannya beberapa detik setelahnya.")
         }
     }
 }

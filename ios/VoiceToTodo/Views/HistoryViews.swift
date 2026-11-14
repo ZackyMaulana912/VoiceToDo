@@ -178,8 +178,8 @@ struct DetailView: View {
             Button("Batal", role: .cancel) {}
         } message: {
             Text(todoCount == 0
-                 ? "Audio dan isi rekaman ini akan dihapus dan tidak bisa dikembalikan."
-                 : "Audio, isi rekaman, dan \(todoCount) to-do dari rekaman ini akan dihapus dan tidak bisa dikembalikan.")
+                 ? "Audio dan isi rekaman ini akan dihapus. Kamu masih bisa mengurungkannya beberapa detik setelahnya."
+                 : "Audio, isi rekaman, dan \(todoCount) to-do dari rekaman ini akan dihapus. Kamu masih bisa mengurungkannya beberapa detik setelahnya.")
         }
     }
 

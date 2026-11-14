@@ -66,6 +66,8 @@ final class AppStore: ObservableObject {
     private var queue: [UUID] = []
     private var worker: Task<Void, Never>?
     private var generation = 0
+    /// False saat aplikasi di latar belakang; proses AI hanya berjalan saat aplikasi aktif.
+    private var isActive = true
 
     init(
         transcriber: Transcriber = WhisperTranscriber(),
@@ -267,7 +269,13 @@ final class AppStore: ObservableObject {
         update(id) { $0.status = .processing; $0.failReason = nil }
         queue.append(id)
         if banner == nil || banner?.kind == .processing { banner = Banner(kind: .processing, recordingID: id) }
-        guard worker == nil else { return }
+        startWorkerIfNeeded()
+    }
+
+    /// Menjalankan antrean bila aplikasi sedang aktif. Rekaman yang masuk saat aplikasi di latar belakang (misalnya
+    /// rekaman yang disimpan karena layar dikunci) menunggu sampai aplikasi dibuka lagi.
+    private func startWorkerIfNeeded() {
+        guard isActive, worker == nil, !queue.isEmpty else { return }
         generation += 1
         let myGeneration = generation
         keepScreenOn(true) // proses berat hanya saat aplikasi terbuka (PROSES_DI_LATAR)
@@ -289,6 +297,7 @@ final class AppStore: ObservableObject {
     /// Dipanggil saat aplikasi masuk latar belakang. iOS tidak mengizinkan proses berat di latar, jadi proses
     /// dihentikan dan rekamannya ditandai "terganggu" supaya bisa dicoba lagi (CLAUDE.md 5.1).
     func interruptProcessing() {
+        isActive = false
         guard let worker else { return }
         worker.cancel()
         self.worker = nil
@@ -301,6 +310,12 @@ final class AppStore: ObservableObject {
         activeID = nil
         stage = nil
         keepScreenOn(false)
+    }
+
+    /// Dipanggil saat aplikasi aktif lagi: rekaman yang menunggu mulai diproses.
+    func resumeProcessing() {
+        isActive = true
+        startWorkerIfNeeded()
     }
 
     private func process(_ id: UUID) async {

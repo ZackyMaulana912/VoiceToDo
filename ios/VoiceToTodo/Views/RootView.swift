@@ -66,6 +66,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             // iOS tidak mengizinkan proses AI berat di latar belakang (CLAUDE.md 5.1).
             if phase == .background { store.interruptProcessing() }
+            if phase == .active { store.resumeProcessing() }
         }
         .alert("Izin dibutuhkan", isPresented: Binding(
             get: { permissionMessage != nil },

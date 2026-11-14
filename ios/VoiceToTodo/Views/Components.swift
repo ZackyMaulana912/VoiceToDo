@@ -330,7 +330,7 @@ struct ResultCardView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(todos) { todo in
                         HStack(alignment: .top, spacing: 4) {
-                            CheckboxView(isOn: todo.isDone, label: todo.title) { onToggle(todo.id) }
+                            CheckboxView(isOn: todo.isDone, label: todo.isDone ? "Tandai belum selesai" : "Tandai selesai") { onToggle(todo.id) }
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(todo.title)
                                     .font(.inter(16))

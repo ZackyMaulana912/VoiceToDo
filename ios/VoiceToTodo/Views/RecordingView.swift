@@ -6,6 +6,7 @@ struct RecordingView: View {
     let onFinish: (RecordedAudio) -> Void
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isFinishing = false
     @State private var confirmCancel = false
 
@@ -102,7 +103,7 @@ struct RecordingView: View {
             }
         }
         .frame(height: 96)
-        .animation(.easeOut(duration: 0.12), value: recorder.levels)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: recorder.levels) // "Kurangi gerakan"
         .accessibilityHidden(true)
     }
 

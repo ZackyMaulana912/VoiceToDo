@@ -407,6 +407,7 @@ struct ProcessingCardView: View {
     let stage: String?
     @State private var angle = 0.0
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -438,6 +439,7 @@ struct ProcessingCardView: View {
         .padding(16)
         .cardStyle()
         .onAppear {
+            guard !reduceMotion else { return } // "Kurangi gerakan": ikon dan kerangka diam
             withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) { angle = 360 }
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true }
         }

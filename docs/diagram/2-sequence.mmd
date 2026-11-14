@@ -1,0 +1,43 @@
+%% Gambar 2. Sequence Diagram proses satu rekaman (digambar dari kode ios/ per 2026-11-12)
+sequenceDiagram
+    actor P as Pengguna
+    participant RV as RecordingView
+    participant SR as SpeechRecorder
+    participant ST as AppStore
+    participant WT as WhisperTranscriber
+    participant LS as LlamaSummarizer
+    participant RK as Ringkasan (inti)
+    participant FW as FrasaWaktu (inti)
+    participant F as File di HP
+
+    P->>RV: Tekan Selesai
+    RV->>SR: stop()
+    SR->>F: Tutup file WAV 16 kHz
+    SR-->>RV: RecordedAudio (nama file, durasi)
+    RV->>ST: finishRecording(audio)
+    ST->>F: Simpan rekaman, status "memproses"
+    ST->>ST: Masukkan ke antrean, layar tetap menyala
+    ST->>WT: transcribe(file audio)
+    WT->>WT: Cek suhu dan memori, muat model Whisper
+    WT->>F: Baca WAV
+    WT-->>ST: Transkrip
+    WT->>WT: Lepas model Whisper dari memori
+    ST->>LS: summarize(transkrip, tanggal rekaman)
+    LS->>LS: Muat model Qwen3 (llama.cpp)
+    loop Setiap bagian 250 kata (atau sekali bila pendek)
+        LS->>LS: Buat JSON dengan grammar
+        LS->>RK: baca(keluaran, transkrip)
+        RK-->>LS: Hasil tervalidasi (coba ulang sekali bila melanggar aturan)
+    end
+    LS->>LS: Lepas model dari memori
+    LS-->>ST: Judul, kategori, ringkasan, poin, to-do + frasa waktu
+    loop Setiap to-do
+        ST->>FW: tanggal(frasa, hari rekaman)
+        FW-->>ST: Tanggal tenggat atau kosong
+    end
+    ST->>F: Simpan hasil, status "selesai"
+    ST-->>P: Kartu hasil di Beranda
+    alt Gagal di tahap mana pun
+        ST->>F: Status "gagal" + kode galat, audio tetap tersimpan
+        ST-->>P: Pesan penyebab + tombol Coba lagi
+    end

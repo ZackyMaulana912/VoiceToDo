@@ -5,6 +5,10 @@ struct VoiceToTodoApp: App {
     /// Alat uji kelayakan AI (Fase 1) hanya dibuka dengan argumen peluncuran `-ujiKelayakan`.
     private let ujiKelayakan = CommandLine.arguments.contains("-ujiKelayakan")
 
+    init() {
+        UjiUI.siapkanBilaDiminta()
+    }
+
     var body: some Scene {
         WindowGroup {
             if ujiKelayakan {

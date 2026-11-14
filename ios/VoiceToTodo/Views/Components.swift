@@ -614,6 +614,7 @@ struct BottomNavView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("tab-\(title.lowercased())")
     }
 }
 

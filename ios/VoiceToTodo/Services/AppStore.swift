@@ -32,6 +32,7 @@ final class AppStore: ObservableObject {
         case editTodo(UUID, oldTitle: String)
         case deleteTodo(TodoItem, index: Int, owners: [(recordingID: UUID, index: Int)])
         case deleteRecording(Recording, index: Int, todos: [(TodoItem, index: Int)])
+        case editTranscript(UUID, transcript: String, original: String?, outdated: Bool?)
     }
 
     @Published private(set) var todos: [TodoItem] = []
@@ -190,6 +191,12 @@ final class AppStore: ObservableObject {
             recordings.insert(rec, at: min(index, recordings.count))
             for (todo, i) in removed { todos.insert(todo, at: min(i, todos.count)) }
             if let name = rec.audioFileName { trash.removeAll { $0 == name } }
+        case .editTranscript(let id, let transcript, let original, let outdated):
+            if let i = recordings.firstIndex(where: { $0.id == id }), recordings[i].status != .processing {
+                recordings[i].transcript = transcript
+                recordings[i].originalTranscript = original
+                recordings[i].summaryOutdated = outdated
+            }
         }
         save()
     }
@@ -225,6 +232,42 @@ final class AppStore: ObservableObject {
 
     func updateSummary(_ recordingID: UUID, text: String) {
         update(recordingID) { $0.summary = text }
+    }
+
+    // MARK: Transkrip
+
+    /// Batas panjang transkrip, sama dengan batas transkrip yang dirangkum (`Ringkasan.Batas.transkrip`).
+    static let maxTranscriptLength = Ringkasan.Batas.transkrip
+
+    /// Merapikan transkrip dari isian: spasi di ujung dibuang. Nil bila kosong atau lebih dari batas.
+    static func cleanTranscript(_ raw: String) -> String? {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, text.count <= maxTranscriptLength else { return nil }
+        return text
+    }
+
+    /// Mengganti transkrip dengan versi yang dibetulkan pengguna. Hasil asli dari AI disimpan di edit pertama, supaya
+    /// tetap bisa dilihat dan dikembalikan. Ringkasan tidak langsung diubah; pengguna memilih "Ringkas ulang".
+    func editTranscript(_ id: UUID, text: String) {
+        guard let text = Self.cleanTranscript(text), let rec = recording(id),
+              rec.status != .processing, rec.transcript != text else { return }
+        let undo = UndoAction.editTranscript(id, transcript: rec.transcript, original: rec.originalTranscript, outdated: rec.summaryOutdated)
+        update(id) {
+            if $0.originalTranscript == nil { $0.originalTranscript = $0.transcript }
+            $0.transcript = text
+            if $0.originalTranscript == text { $0.originalTranscript = nil } // kembali persis ke hasil AI
+            if $0.status == .done { $0.summaryOutdated = true }
+        }
+        offerUndo(recording(id)?.isTranscriptEdited == false ? "Transkrip dikembalikan ke asli" : "Transkrip diubah", undo)
+    }
+
+    /// Membuat ulang ringkasan dan to-do dari transkrip yang sudah diedit. To-do lama rekaman ini diganti saat hasil
+    /// baru selesai; kalau gagal, rekaman ditandai gagal dan bisa dicoba lagi dengan transkrip yang sama.
+    func resummarize(_ id: UUID) {
+        guard let rec = recording(id), rec.status == .done, rec.usesStoredTranscript else { return }
+        // Tawaran "Urungkan" yang masih tampil bisa menyentuh rekaman ini atau to-do lamanya; jadikan permanen dulu.
+        if let offer = undoOffer { expireUndo(offer.id) }
+        enqueue(id)
     }
 
     func dismissResultBanner() {
@@ -322,11 +365,13 @@ final class AppStore: ObservableObject {
         guard let current = recording(id) else { return }
         if banner == nil || banner?.kind == .processing { banner = Banner(kind: .processing, recordingID: id) }
 
-        // 1. Suara jadi teks, selalu dari file audio yang tersimpan.
-        stage = .transcribing
+        // 1. Suara jadi teks dari file audio yang tersimpan, kecuali transkripnya sudah dibetulkan pengguna.
         var transcript: String
         let audioURL = current.audioFileName.flatMap { $0.isEmpty ? nil : SpeechRecorder.folder.appendingPathComponent($0) }
-        if let audioURL, FileManager.default.fileExists(atPath: audioURL.path) {
+        if current.usesStoredTranscript {
+            transcript = current.transcript
+        } else if let audioURL, FileManager.default.fileExists(atPath: audioURL.path) {
+            stage = .transcribing
             do {
                 transcript = try await transcriber.transcribe(audioURL)
             } catch {
@@ -382,10 +427,14 @@ final class AppStore: ObservableObject {
             )
         }
 
+        // Ringkas ulang: to-do lama dari rekaman ini diganti hasil baru.
+        let oldTodoIDs = Set(recording(id)?.todoIDs ?? [])
+        todos.removeAll { $0.recordingID == id || oldTodoIDs.contains($0.id) }
         todos.insert(contentsOf: newTodos, at: 0)
         update(id) {
             $0.status = .done
             $0.failReason = nil
+            $0.summaryOutdated = nil
             $0.title = result.title
             $0.category = result.category
             $0.summary = result.summary

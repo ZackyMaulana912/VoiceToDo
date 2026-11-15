@@ -36,8 +36,10 @@ final class FakeSummarizer: Summarizer, @unchecked Sendable {
     var error: Error?
     var todos = [TodoDraft(title: "satu", due: "Jumat"), TodoDraft(title: "dua", due: "minggu depan"), TodoDraft(title: "tiga", due: nil)]
     var calls = 0
+    var terakhir = ""
     func summarize(_ t: String, date: Date) async throws -> SummaryResult {
         calls += 1
+        terakhir = t
         if let error { throw error }
         return SummaryResult(title: "Rapat Uji", category: .rapat, summary: "ringkas", points: ["p"], todos: todos)
     }
@@ -332,6 +334,90 @@ func ujiPerekam() {
     }
 }
 
+
+@MainActor func ujiEditTranskrip() async {
+    print("== Edit transkrip dan ringkas ulang")
+    bersih()
+    let tr = FakeTranscriber(), sm = FakeSummarizer()
+    let s = AppStore(transcriber: tr, summarizer: sm, keepScreenOn: { _ in })
+    let asli = "besok kumpulkan laporan rapat"
+    let a = await rekam(s, "a.wav")
+    let todoLama = s.recording(a)!.todoIDs
+
+    s.editTranscript(a, text: "  besok kirim laporan ke Bu Rina  ")
+    var r = s.recording(a)!
+    cek("edit: transkrip dirapikan, hasil AI disimpan", r.transcript == "besok kirim laporan ke Bu Rina" && r.originalTranscript == asli)
+    cek("edit: ringkasan ditandai perlu diulang, to-do belum berubah", r.needsResummary && r.todoIDs == todoLama && s.todos.count == 3)
+    cek("edit: tawaran Urungkan", s.undoOffer?.message == "Transkrip diubah")
+    s.undo()
+    r = s.recording(a)!
+    cek("edit diurungkan: kembali seperti semula", r.transcript == asli && r.originalTranscript == nil && !r.needsResummary)
+
+    s.editTranscript(a, text: "   ")
+    cek("transkrip kosong ditolak", s.recording(a)!.transcript == asli && s.undoOffer == nil)
+    s.editTranscript(a, text: String(repeating: "a", count: AppStore.maxTranscriptLength + 1))
+    cek("transkrip terlalu panjang ditolak", s.recording(a)!.transcript == asli)
+
+    s.editTranscript(a, text: "besok kirim laporan ke Bu Rina")
+    s.toggle(todoLama[0])
+    let whisperSebelum = tr.calls.count
+    s.resummarize(a)
+    cek("ringkas ulang: tawaran Urungkan lama dijadikan permanen", s.undoOffer == nil)
+    await tunggu(s, a)
+    r = s.recording(a)!
+    cek("ringkas ulang: suara tidak diubah jadi teks lagi", tr.calls.count == whisperSebelum)
+    cek("ringkas ulang: peringkas memakai transkrip yang diedit", sm.terakhir == "besok kirim laporan ke Bu Rina")
+    cek("ringkas ulang: to-do lama diganti 3 to-do baru",
+        r.status == .done && s.todos.count == 3 && Set(r.todoIDs).isDisjoint(with: todoLama) && s.todos(for: r).count == 3)
+    cek("ringkas ulang: transkrip asli tetap tersimpan, tanda perlu diulang hilang",
+        r.transcript == "besok kirim laporan ke Bu Rina" && r.originalTranscript == asli && !r.needsResummary)
+
+    s.editTranscript(a, text: asli)
+    r = s.recording(a)!
+    cek("kembalikan ke asli: tanda diedit hilang, ringkasan perlu diulang", r.originalTranscript == nil && r.needsResummary
+        && s.undoOffer?.message == "Transkrip dikembalikan ke asli")
+    s.resummarize(a)
+    await tunggu(s, a)
+    cek("ringkas ulang dari transkrip asli tanpa transkripsi ulang", tr.calls.count == whisperSebelum && sm.terakhir == asli && !s.recording(a)!.needsResummary)
+    s.resummarize(a)
+    cek("ringkas ulang tanpa perubahan transkrip diabaikan", s.recording(a)!.status == .done && sm.calls == 3)
+
+    // Ringkas ulang gagal, lalu Coba lagi
+    s.editTranscript(a, text: "lusa rapat panitia lagi di aula")
+    sm.error = ProcessingError.summaryFailed
+    s.resummarize(a)
+    await tunggu(s, a)
+    cek("ringkas ulang gagal: rekaman gagal, transkrip editan tetap", s.recording(a)?.failReason == .summaryFailed
+        && s.recording(a)?.transcript == "lusa rapat panitia lagi di aula")
+    sm.error = nil
+    s.retry(a)
+    await tunggu(s, a)
+    cek("Coba lagi memakai transkrip editan, to-do tidak dobel", s.recording(a)?.status == .done && tr.calls.count == whisperSebelum
+        && sm.terakhir == "lusa rapat panitia lagi di aula" && s.todos.filter { $0.recordingID == a }.count == 3 && s.todos.count == 3)
+
+    // Rekaman gagal: transkrip dibetulkan dulu, lalu Coba lagi
+    sm.error = ProcessingError.summaryFailed
+    let b = await rekam(s, "b.wav")
+    sm.error = nil
+    s.editTranscript(b, text: "Jumat kirim proposal ke dosen")
+    cek("rekaman gagal: transkrip bisa diedit, tanpa tanda ringkas ulang", s.recording(b)!.isTranscriptEdited && !s.recording(b)!.needsResummary)
+    let panggilan = tr.calls.count
+    s.retry(b)
+    await tunggu(s, b)
+    cek("Coba lagi rekaman gagal memakai transkrip editan", s.recording(b)?.status == .done && tr.calls.count == panggilan && sm.terakhir == "Jumat kirim proposal ke dosen")
+
+    // Tidak bisa diedit saat diproses
+    tr.delayNs = 200_000_000
+    let c = await rekam(s, "c.wav", tunggu: false)
+    s.editTranscript(c, text: "ubah saat diproses")
+    cek("sedang diproses: transkrip tidak bisa diedit", s.recording(c)?.originalTranscript == nil)
+    await tunggu(s, c)
+    tr.delayNs = 0
+
+    let ulang = AppStore(transcriber: tr, summarizer: sm, keepScreenOn: { _ in })
+    cek("dibuka ulang: transkrip asli dan editan tersimpan", ulang.recording(b)?.originalTranscript == asli
+        && ulang.recording(b)?.transcript == "Jumat kirim proposal ke dosen")
+}
 @MainActor func run() async {
     // Penjaga: hanya jalan di folder sementara (mktemp), tidak pernah di Documents asli.
     let sementara = ["/tmp/", "/var/folders/", "/private/var/folders/", "scratchpad"]
@@ -341,6 +427,7 @@ func ujiPerekam() {
     await ujiAlurProses()
     await ujiAntrean()
     await ujiHapusEditUndo()
+    await ujiEditTranskrip()
     await ujiPenyimpanan()
     ujiPerekam()
     bersih()

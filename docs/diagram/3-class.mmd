@@ -1,0 +1,115 @@
+%% Gambar 3. Class Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12)
+classDiagram
+    direction TB
+    class Recording {
+        +UUID id
+        +Date createdAt
+        +String title
+        +TodoCategory category
+        +RecordingStatus status
+        +Int duration
+        +String summary
+        +String[] points
+        +UUID[] todoIDs
+        +String transcript
+        +String audioFileName
+        +String stopNote
+        +FailReason failReason
+    }
+    class TodoItem {
+        +UUID id
+        +String title
+        +TodoCategory category
+        +String due
+        +Tanggal dueDate
+        +Bool isDone
+        +UUID recordingID
+        +dueLabel() LabelTenggat
+    }
+    class RecordingStatus {
+        <<enumeration>>
+        processing
+        done
+        failed
+    }
+    class FailReason {
+        <<enumeration>>
+        terganggu
+        tidak-terdengar
+        terlalu-pendek
+        transkripsi-gagal
+        ringkasan-gagal
+        memori-kurang
+        terlalu-panas
+        model-tidak-ada
+        tanpa-audio
+    }
+    class TodoCategory {
+        <<enumeration>>
+        Rapat
+        Kuliah
+        Ide
+    }
+    class AppStore {
+        +todos, recordings
+        +finishRecording(audio)
+        +retry(id)
+        +toggle / editTodo / addTodo / deleteTodo
+        +deleteRecording(id)
+        +undo()
+        +interruptProcessing() / resumeProcessing()
+        -process(id)
+        -save() / load()
+    }
+    class SpeechRecorder {
+        +start()
+        +stop() RecordedAudio
+        +cancel()
+    }
+    class AudioSink {
+        +write(buffer)
+    }
+    class Transcriber {
+        <<interface>>
+        +transcribe(url) String
+    }
+    class WhisperTranscriber
+    class Summarizer {
+        <<interface>>
+        +summarize(transkrip, tanggal) SummaryResult
+    }
+    class LlamaSummarizer
+    class LlamaRunner {
+        +chatPrompt()
+        +generate(prompt, grammar)
+    }
+    class Ringkasan {
+        <<inti>>
+        +grammar
+        +baca(keluaran, transkrip) HasilRingkasan
+        +bagian(transkrip)
+    }
+    class FrasaWaktu {
+        <<inti>>
+        +tanggal(frasa, hariRekaman) Tanggal
+    }
+    class Tanggal {
+        <<inti>>
+        +tahun, bulan, hari
+    }
+
+    AppStore "1" o-- "*" Recording
+    AppStore "1" o-- "*" TodoItem
+    Recording "1" --> "*" TodoItem : todoIDs
+    Recording --> RecordingStatus
+    Recording --> FailReason
+    TodoItem --> Tanggal
+    AppStore --> Transcriber
+    AppStore --> Summarizer
+    AppStore ..> FrasaWaktu
+    Transcriber <|.. WhisperTranscriber
+    Summarizer <|.. LlamaSummarizer
+    LlamaSummarizer --> LlamaRunner
+    LlamaSummarizer ..> Ringkasan
+    SpeechRecorder --> AudioSink
+    FrasaWaktu ..> Tanggal

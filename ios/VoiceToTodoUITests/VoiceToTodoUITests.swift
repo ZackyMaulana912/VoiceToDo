@@ -10,9 +10,10 @@ final class VoiceToTodoUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func buka(ukuranHuruf: String? = nil, audio: Bool = false) {
+    func buka(ukuranHuruf: String? = nil, audio: Bool = false, data: String? = nil) {
         app = XCUIApplication()
         app.launchArguments = ["-ujiUI"]
+        if let data { app.launchEnvironment["UJI_DATA"] = data }
         if let ukuranHuruf { app.launchArguments += ["-UIPreferredContentSizeCategoryName", ukuranHuruf] }
         if audio, let path = ProcessInfo.processInfo.environment["UJI_AUDIO"] { app.launchEnvironment["UJI_AUDIO"] = path }
         app.launch()
@@ -197,5 +198,75 @@ final class VoiceToTodoUITests: XCTestCase {
         layar("47-rekaman-dihapus")
         app.buttons["Urungkan"].tap()
         XCTAssertTrue(baris("Selesai").waitForExistence(timeout: 5), "rekaman harus kembali setelah diurungkan")
+    }
+
+    // MARK: Edit transkrip (tanpa AI: data awal sudah berisi rekaman selesai)
+
+    static let dataRekamanSelesai = """
+    {"todos":[{"id":"8D2C7B3E-1F00-4C1A-9C5E-000000000001","title":"Kirim notulen ke Bu Rina","category":"Rapat",
+    "due":"besok","source":"dari rapat panitia, 15 Nov","isDone":false,
+    "recordingID":"8D2C7B3E-1F00-4C1A-9C5E-0000000000AA","createdAt":"2026-11-15T03:00:00Z"}],
+    "recordings":[{"id":"8D2C7B3E-1F00-4C1A-9C5E-0000000000AA","createdAt":"2026-11-15T03:00:00Z",
+    "title":"Rapat panitia","category":"Rapat","status":"done","duration":95,
+    "summary":"Rapat membahas persiapan acara.","points":["Notulen dikirim besok"],
+    "todoIDs":["8D2C7B3E-1F00-4C1A-9C5E-000000000001"],
+    "transcript":"Besok kirim notulen ke bu rina dan cek sound sistem di aula."}]}
+    """
+
+    func testEditTranskrip() {
+        buka(data: Self.dataRekamanSelesai)
+        app.buttons["tab-riwayat"].tap()
+        XCTAssertTrue(baris("Rapat panitia").waitForExistence(timeout: 5))
+        baris("Rapat panitia").tap()
+
+        let transkrip = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Transkrip lengkap")).firstMatch
+        XCTAssertTrue(transkrip.waitForExistence(timeout: 5))
+        transkrip.tap()
+        XCTAssertTrue(app.staticTexts["Besok kirim notulen ke bu rina dan cek sound sistem di aula."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Lihat transkrip asli"].exists, "belum diedit: tidak ada transkrip asli")
+        app.swipeUp()
+        layar("50-detail-transkrip-terbuka")
+
+        app.buttons["Edit transkrip"].tap()
+        let editor = app.textViews["Transkrip"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.press(forDuration: 1.2)
+        if app.menuItems["Select All"].waitForExistence(timeout: 2) { app.menuItems["Select All"].tap() }
+        else if app.menuItems["Pilih Semua"].exists { app.menuItems["Pilih Semua"].tap() }
+        editor.typeText(XCUIKeyboardKey.delete.rawValue)
+        layar("51-edit-transkrip-kosong")
+        XCTAssertTrue(app.staticTexts["Transkrip tidak boleh kosong."].exists)
+        editor.typeText("Besok kirim notulen ke Bu Rina dan cek sound system di aula.")
+        layar("52-edit-transkrip")
+        app.buttons["Simpan"].tap()
+
+        XCTAssertTrue(app.staticTexts["Besok kirim notulen ke Bu Rina dan cek sound system di aula."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Diedit"].exists)
+        XCTAssertTrue(app.buttons["Ringkas ulang"].exists)
+        app.swipeUp()
+        layar("53-transkrip-diedit")
+
+        app.buttons["Ringkas ulang"].tap()
+        XCTAssertTrue(app.staticTexts["Ringkas ulang dari transkrip ini?"].waitForExistence(timeout: 5))
+        layar("54-konfirmasi-ringkas-ulang")
+        // iOS 26 ke atas menampilkan konfirmasi sebagai gelembung tanpa tombol Batal: ketuk di luarnya.
+        if let batal = app.buttons.matching(identifier: "Batal").allElementsBoundByIndex.last(where: { $0.isHittable }) {
+            batal.tap()
+        } else {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.2)).tap()
+        }
+        XCTAssertFalse(app.staticTexts["Ringkas ulang dari transkrip ini?"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Ringkas ulang"].exists, "batal: rekaman tidak diproses")
+
+        app.buttons["Lihat transkrip asli"].tap()
+        XCTAssertTrue(app.staticTexts["Besok kirim notulen ke bu rina dan cek sound sistem di aula."].waitForExistence(timeout: 5))
+        layar("55-transkrip-asli")
+        app.buttons["Kembalikan ke asli"].tap()
+        XCTAssertTrue(app.staticTexts["Transkrip dikembalikan ke asli"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Diedit"].exists)
+        XCTAssertFalse(app.buttons["Lihat transkrip asli"].exists)
+        layar("56-transkrip-dikembalikan")
+        app.buttons["Urungkan"].tap()
+        XCTAssertTrue(app.staticTexts["Diedit"].waitForExistence(timeout: 5), "urungkan harus mengembalikan editan")
     }
 }

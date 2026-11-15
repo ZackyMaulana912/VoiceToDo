@@ -1,8 +1,9 @@
 # Fase 8: Penyusunan dokumen
 
 Rencana dokumen akhir Voice-to-Todo (SRS dan arsitektur). Susunannya mengikuti contoh dokumen RBPL yang memakai model
-4+1 View. Status: **belum dikerjakan**. Diagram digambar setelah aplikasinya jadi, supaya isinya sesuai kode
-sungguhan, bukan rencana.
+4+1 View. Status: **draf pertama selesai 2026-11-12** di `docs/dokumen/Dokumen-Voice-to-Todo.md` dan versi Word
+`Dokumen-Voice-to-Todo.docx` (dibuat dengan `docs/dokumen/buat-docx.py`). Diagram ada di `docs/diagram/`, digambar dari
+kode per 12 November 2026.
 
 ## Aturan
 
@@ -43,7 +44,10 @@ Activity Diagram dan ERD tidak dipakai, kecuali dosen mewajibkannya.
 6. Keterlacakan kebutuhan ke komponen (tabel KF/KNF ke file atau bagian program)
 7. Hasil uji dan keterbatasan
 
-## Belum diputuskan
+## Keputusan (2026-11-12, mandat user)
 
-- Format akhir dokumen (Word, PDF, atau lainnya) dan alat untuk menggambar diagram.
-- Apakah perlu bagian laporan wawancara pengguna seperti di contoh dokumen.
+- Format: Markdown sebagai sumber dan Word (`.docx`) untuk diserahkan. Word dibuat ulang dari Markdown dengan skrip.
+- Alat diagram: Graphviz untuk Use Case dan Deployment, Mermaid untuk Sequence, Class, dan State Machine. Sumbernya
+  ikut disimpan supaya bisa diperbarui.
+- Bagian laporan wawancara pengguna belum dibuat, karena belum ada wawancara sungguhan. Tidak dikarang.
+- Angka performa di HP belum ada; dokumen menuliskannya sebagai keterbatasan, bukan menebak.

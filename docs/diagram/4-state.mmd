@@ -1,0 +1,17 @@
+%% Gambar 4. State Machine Diagram status rekaman (digambar dari kode ios/ per 2026-11-12)
+stateDiagram-v2
+    [*] --> Merekam : tekan tombol rekam
+    Merekam --> [*] : Batal lalu "Buang rekaman"
+    Merekam --> Memproses : Selesai / batas 10 menit / terputus (telepon, layar dikunci)
+    state Memproses {
+        [*] --> MenungguGiliran
+        MenungguGiliran --> MengubahSuaraJadiTeks : giliran tiba
+        MengubahSuaraJadiTeks --> Merangkum : transkrip minimal 3 kata
+    }
+    Memproses --> Selesai : hasil tervalidasi
+    Memproses --> Gagal : kode galat, misalnya tidak-terdengar, ringkasan-gagal, memori-kurang, atau terganggu (aplikasi ditinggalkan)
+    Gagal --> Memproses : Coba lagi (bila audio dan model ada)
+    Selesai --> Dihapus : Hapus rekaman
+    Gagal --> Dihapus : Hapus rekaman
+    Dihapus --> Selesai : Urungkan
+    Dihapus --> [*] : waktu Urungkan habis, audio dibuang

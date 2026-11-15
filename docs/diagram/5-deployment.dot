@@ -1,0 +1,36 @@
+// Gambar 5. Deployment Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12)
+digraph deployment {
+  rankdir=LR; compound=true; fontname="Helvetica"; node [fontname="Helvetica", fontsize=11]; edge [fontname="Helvetica", fontsize=10];
+  subgraph cluster_iphone {
+    label="«device» iPhone (iOS 17 ke atas): 17 Pro, XR"; style="rounded,bold"; color="#0f172a";
+    mic [shape=box3d, label="«device»\nMikrofon"];
+    subgraph cluster_app {
+      label="«execution environment» Aplikasi Voice-to-Todo"; style=rounded; color="#4f46e5";
+      ui [shape=component, label="Tampilan SwiftUI\n(Beranda, Perekam, Riwayat, Detail)"];
+      store [shape=component, label="AppStore\n(antrean proses, Urungkan)"];
+      rec [shape=component, label="SpeechRecorder\n(AVAudioEngine, WAV 16 kHz)"];
+      wk [shape=component, label="WhisperKit 1.1.1\n(Core ML)"];
+      ll [shape=component, label="llama.cpp b12291\n(Metal / CPU)"];
+      core [shape=component, label="VoiceToTodoCore\n(frasa waktu, validasi)"];
+      subgraph cluster_bundle {
+        label="«artifact» Model AI di dalam aplikasi"; style=dashed; color="#64748b";
+        mw [shape=note, label="Whisper large-v3 turbo\n(17 Pro) / base (XR)"];
+        mq [shape=note, label="Qwen3-4B (17 Pro) /\nQwen3-1.7B (XR), GGUF"];
+      }
+    }
+    subgraph cluster_fs {
+      label="«execution environment» Penyimpanan HP (Documents)"; style=rounded; color="#166534";
+      json [shape=note, label="voice-to-todo.json\n(rekaman, to-do)"];
+      wav [shape=note, label="Recordings/*.wav"];
+    }
+    npu [shape=box3d, label="«device»\nNeural Engine / GPU"];
+  }
+  subgraph cluster_mac {
+    label="«device» Mac pengembang (hanya saat memasang)"; style="rounded,dashed"; color="#94a3b8";
+    xcode [shape=component, label="Xcode + skrip\nunduh-model, siapkan-llama"];
+  }
+  mic -> rec; ui -> store; ui -> rec; store -> wk; store -> ll; store -> core; store -> json; rec -> wav; wk -> wav [label="baca"];
+  wk -> mw [style=dashed]; ll -> mq [style=dashed]; wk -> npu [style=dotted]; ll -> npu [style=dotted];
+  xcode -> ui [lhead=cluster_app, style=dashed, label="USB: pasang aplikasi\n(akun gratis, 7 hari)"];
+  note [shape=plaintext, fontcolor="#b91c1c", label="Tidak ada server dan tidak ada\nkoneksi internet saat aplikasi berjalan"];
+}

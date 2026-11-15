@@ -128,6 +128,18 @@ struct Recording: Identifiable, Codable, Equatable {
     var stopNote: String?
     /// Diisi saat status `failed`. Optional supaya data lama tetap terbaca.
     var failReason: FailReason?
+    /// Hasil asli dari AI sebelum transkrip diedit pengguna. Nil bila transkrip belum pernah diedit.
+    var originalTranscript: String?
+    /// True bila transkrip diubah setelah ringkasan dibuat: ringkasan dan to-do masih dari transkrip lama.
+    var summaryOutdated: Bool?
+
+    var isTranscriptEdited: Bool { originalTranscript != nil }
+    var needsResummary: Bool { status == .done && summaryOutdated == true }
+    /// Saat diproses ulang, transkrip yang tersimpan dipakai apa adanya (suara tidak diubah jadi teks lagi), supaya
+    /// editan pengguna tidak tertimpa hasil AI.
+    var usesStoredTranscript: Bool {
+        (isTranscriptEdited || summaryOutdated == true) && !transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var failMessage: String { failReason?.message ?? FailReason.genericMessage }
     var canRetry: Bool { failReason?.canRetry ?? true }

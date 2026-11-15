@@ -625,3 +625,149 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
+
+/// Lembar layar penuh untuk membetulkan transkrip (misalnya kata yang salah dengar).
+struct TranscriptEditView: View {
+    let initialText: String
+    let onSave: (String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    private var cleaned: String? { AppStore.cleanTranscript(text) }
+    private var length: Int { text.trimmingCharacters(in: .whitespacesAndNewlines).count }
+    private var problemText: String? {
+        if length == 0 { return "Transkrip tidak boleh kosong." }
+        if length > AppStore.maxTranscriptLength {
+            return "Maksimal \(AppStore.maxTranscriptLength) karakter (sekarang \(length))."
+        }
+        return nil
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Edit transkrip")
+                .font(.inter(18, weight: .semibold))
+                .foregroundStyle(Color.ink)
+                .padding(.top, 8)
+            Text("Betulkan kata yang salah dengar. Hasil asli dari AI tetap disimpan.")
+                .font(.inter(13, weight: .medium))
+                .foregroundStyle(Color.mutedInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            TextEditor(text: $text)
+                .font(.inter(16))
+                .foregroundStyle(Color.ink)
+                .scrollContentBackground(.hidden)
+                .focused($focused)
+                .padding(6)
+                .frame(maxHeight: .infinity)
+                .background(Color.white)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(problemText == nil ? Color.brand : Color(hex: 0xDC2626), lineWidth: 1)
+                }
+                .accessibilityLabel("Transkrip")
+
+            if let problemText {
+                Text(problemText)
+                    .font(.inter(13, weight: .medium))
+                    .foregroundStyle(Color(hex: 0xB91C1C))
+            }
+
+            SheetButtons(saveTitle: "Simpan", canSave: cleaned != nil, onCancel: { dismiss() }) {
+                guard let cleaned else { return }
+                onSave(cleaned)
+                dismiss()
+            }
+        }
+        .padding(16)
+        .background(Color.appBackground)
+        .presentationDetents([.large])
+        .interactiveDismissDisabled(text != initialText)
+        .onAppear {
+            text = initialText
+            focused = true
+        }
+    }
+}
+
+/// Lembar baca untuk hasil transkrip asli dari AI, dengan pilihan mengembalikannya.
+struct OriginalTranscriptView: View {
+    let text: String
+    let onRestore: (String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Transkrip asli")
+                .font(.inter(18, weight: .semibold))
+                .foregroundStyle(Color.ink)
+                .padding(.top, 8)
+            Text("Hasil AI sebelum kamu edit.")
+                .font(.inter(13, weight: .medium))
+                .foregroundStyle(Color.mutedInk)
+
+            ScrollView {
+                Text(text)
+                    .font(.inter(16))
+                    .foregroundStyle(Color.ink)
+                    .lineSpacing(5)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+            }
+            .frame(maxHeight: .infinity)
+            .cardStyle()
+
+            SheetButtons(saveTitle: "Kembalikan ke asli", canSave: true, cancelTitle: "Tutup", onCancel: { dismiss() }) {
+                onRestore(text)
+                dismiss()
+            }
+        }
+        .padding(16)
+        .background(Color.appBackground)
+        .presentationDetents([.large])
+    }
+}
+
+/// Pasangan tombol di bawah lembar: kiri tombol bergaris, kanan tombol utama.
+struct SheetButtons: View {
+    let saveTitle: String
+    let canSave: Bool
+    var cancelTitle = "Batal"
+    let onCancel: () -> Void
+    let onSave: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: onCancel) {
+                Text(cancelTitle)
+                    .font(.inter(16, weight: .semibold))
+                    .foregroundStyle(Color.ink)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 48)
+                    .background(Color.white)
+                    .overlay { RoundedRectangle(cornerRadius: 8).stroke(Color.border, lineWidth: 1) }
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+
+            Button(action: onSave) {
+                Text(saveTitle)
+                    .font(.inter(16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 48)
+                    .background(Color.brand)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+            .disabled(!canSave)
+            .opacity(canSave ? 1 : 0.5)
+        }
+    }
+}

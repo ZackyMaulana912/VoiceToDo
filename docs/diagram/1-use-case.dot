@@ -1,4 +1,4 @@
-// Gambar 1. Use Case Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12)
+// Gambar 1. Use Case Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12, diperbarui 2026-11-16)
 digraph usecase {
   rankdir=LR; nodesep=0.12; ranksep=1.2; fontname="Helvetica"; node [fontname="Helvetica", fontsize=12]; edge [fontname="Helvetica", fontsize=10];
   pengguna [ordering=out, shape=none, label=<<table border="0" cellborder="0"><tr><td><font point-size="34">&#x1F464;</font></td></tr><tr><td>Pengguna</td></tr></table>>];
@@ -20,13 +20,18 @@ digraph usecase {
     salin [label="Menyalin hasil"];
     hapusrek [label="Menghapus rekaman"];
     coba [label="Mencoba lagi\nrekaman yang gagal"];
+    edittr [label="Mengedit transkrip"];
+    asli [label="Melihat transkrip asli"];
+    ulang [label="Meringkas ulang"];
   }
   // Satu kolom kasus penggunaan, urut seperti alur pemakaian; "Memproses rekaman" di kolom kanan.
-  pengguna -> {rekam batal hasil centang tambah ubah hapus urung riwayat detail ringkas salin hapusrek coba} [arrowhead=none];
+  pengguna -> {rekam batal hasil centang tambah ubah hapus urung riwayat detail edittr asli ulang ringkas salin hapusrek coba} [arrowhead=none];
   rekam -> proses [style=dashed, label="«include»"];
   coba -> proses [style=dashed, label="«include»"];
+  ulang -> proses [style=dashed, label="«include»"];
   batal -> rekam [style=dashed, label="«extend»", constraint=false];
   urung -> centang [style=dashed, label="«extend»", constraint=false];
   urung -> hapus [style=dashed, label="«extend»", constraint=false];
   urung -> hapusrek [style=dashed, label="«extend»", constraint=false];
+  urung -> edittr [style=dashed, label="«extend»", constraint=false];
 }

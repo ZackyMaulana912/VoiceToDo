@@ -92,7 +92,7 @@ File cadangan hasil uji B (2 KB) tertinggal di HP, karena `devicectl` tidak bisa
 ## Uji yang menunggu HP
 
 Keputusan user 2026-11-12: uji di HP dikumpulkan di akhir. Perubahan di bawah sudah dibuktikan lewat kode (build
-berhasil untuk iOS, target minimum di proyek 16.0), tetapi **belum diuji di HP**. Hasilnya diisi saat diuji.
+berhasil untuk iOS, target minimum di proyek 17.0), tetapi **belum diuji di HP**. Hasilnya diisi saat diuji.
 
 | Perubahan | Cara uji di 17 Pro | Hasil |
 |---|---|---|

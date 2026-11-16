@@ -1,4 +1,4 @@
-%% Gambar 3. Class Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12)
+%% Gambar 3. Class Diagram Voice-to-Todo (digambar dari kode ios/ per 2026-11-12, diperbarui 2026-11-16)
 classDiagram
     direction TB
     class Recording {
@@ -12,6 +12,8 @@ classDiagram
         +String[] points
         +UUID[] todoIDs
         +String transcript
+        +String originalTranscript
+        +Bool summaryOutdated
         +String audioFileName
         +String stopNote
         +FailReason failReason
@@ -54,6 +56,7 @@ classDiagram
         +todos, recordings
         +finishRecording(audio)
         +retry(id)
+        +editTranscript(id, teks) / resummarize(id)
         +toggle / editTodo / addTodo / deleteTodo
         +deleteRecording(id)
         +undo()

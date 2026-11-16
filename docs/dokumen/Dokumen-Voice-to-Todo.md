@@ -1,7 +1,7 @@
 # Dokumen Spesifikasi dan Arsitektur Voice-to-Todo (iPhone, offline)
 
-Mata kuliah RBPL. Versi 1.0, 12 November 2026. Disusun dari kode di folder `ios/` dan hasil uji di
-`docs/catatan-uji.md`. Semua diagram digambar dari kode yang sudah jadi.
+Mata kuliah RBPL. Versi 1.1, 16 November 2026 (versi 1.0: 12 November 2026; versi 1.1 menambah edit transkrip).
+Disusun dari kode di folder `ios/` dan hasil uji di `docs/catatan-uji.md`. Semua diagram digambar dari kode yang sudah jadi.
 
 ## 1. Tujuan dan batasan
 
@@ -40,6 +40,7 @@ Batasan:
 | KF-06 | Mencentang, mengubah, menambah, dan menghapus to-do; menghapus rekaman |
 | KF-07 | Melihat riwayat rekaman, detail, dan transkrip lengkap |
 | KF-08 | Memproses ulang rekaman yang gagal ("Coba lagi") |
+| KF-09 | Mengedit transkrip, melihat transkrip asli hasil AI, dan meringkas ulang dari transkrip yang sudah diedit |
 
 ### 2.3 Kebutuhan non-fungsional
 
@@ -62,13 +63,14 @@ Batasan:
 | Model suara dan ringkasan dimuat bergantian, tidak pernah bersamaan | Supaya muat di memori 3 GB milik XR |
 | Model dipilih menurut kemampuan HP: Whisper large-v3 turbo dan Qwen3-4B di 17 Pro, Whisper base dan Qwen3-1.7B di XR | Kualitas terbaik di HP baru tanpa membuat HP lama kehabisan memori |
 | Transkrip panjang diringkas per bagian 250 kata | Model kecil melewatkan banyak tugas pada teks panjang |
+| Transkrip yang diedit pengguna dipakai apa adanya saat Ringkas ulang atau Coba lagi; hasil asli AI tetap disimpan | Kata yang salah dengar bisa dibetulkan tanpa mengulang transkripsi, dan editan tidak tertimpa hasil AI (KF-09) |
 | Setiap kegagalan punya kode galat dan pesan yang tampil di layar | Tidak gagal diam-diam |
 
 ## 4. Pola arsitektur
 
 Aplikasi memakai pola satu sumber data (*single store*) dengan lapisan berikut:
 
-1. **Tampilan** (SwiftUI): Beranda, Perekam, Riwayat, Detail, dan lembar isian to-do. Tampilan hanya membaca data dan
+1. **Tampilan** (SwiftUI): Beranda, Perekam, Riwayat, Detail, serta lembar isian to-do dan transkrip. Tampilan hanya membaca data dan
    meneruskan aksi pengguna.
 2. **AppStore**: satu-satunya pemilik data rekaman dan to-do. Mengatur antrean proses (satu rekaman sekali jalan),
    Urungkan, dan penyimpanan ke file JSON.
@@ -82,7 +84,8 @@ Aplikasi memakai pola satu sumber data (*single store*) dengan lapisan berikut:
 
 ### 5.1 Scenario View
 
-Pengguna berinteraksi langsung dengan aplikasi. Merekam dan Coba lagi selalu memicu pemrosesan rekaman.
+Pengguna berinteraksi langsung dengan aplikasi. Merekam, Coba lagi, dan Ringkas ulang selalu memicu pemrosesan rekaman. Ringkas ulang memakai transkrip yang sudah
+diedit, jadi tahap suara jadi teks dilewati.
 
 ![Use Case Diagram](../diagram/1-use-case.png)
 
@@ -102,7 +105,8 @@ Gambar 3. Class Diagram Voice-to-Todo
 
 ### 5.3 Process View
 
-Status rekaman dari mulai direkam sampai selesai, gagal, atau dihapus:
+Status rekaman dari mulai direkam sampai selesai, gagal, atau dihapus. Rekaman yang sudah selesai bisa kembali ke
+Memproses lewat Ringkas ulang setelah transkripnya diedit:
 
 ![State Machine Diagram](../diagram/4-state.png)
 
@@ -143,13 +147,14 @@ Gambar 5. Deployment Diagram Voice-to-Todo
 | ID | Komponen | Bukti uji |
 |---|---|---|
 | KF-01 | `SpeechRecorder`, `RecordingView` | Uji konversi audio di Mac; perekaman di HP menunggu |
-| KF-02 | `AppStore.finishRecording`, `recoverOrphanAudio`, tempat sampah Urungkan | Uji regresi Mac (52 uji) |
+| KF-02 | `AppStore.finishRecording`, `recoverOrphanAudio`, tempat sampah Urungkan | Uji regresi Mac (72 uji) |
 | KF-03 | `WhisperTranscriber` | WER 5% (turbo, Mac, audio sintetis) |
 | KF-04 | `LlamaSummarizer`, `Ringkasan` | 15/17 to-do (Qwen3-4B, Mac, audio sintetis) |
 | KF-05 | `FrasaWaktu`, `LabelTenggat` | 22 unit test |
 | KF-06 | `AppStore` (toggle, edit, tambah, hapus, Urungkan), lembar isian | Uji regresi Mac dan uji UI Simulator |
 | KF-07 | `HistoryView`, `DetailView` | Uji UI Simulator |
 | KF-08 | `AppStore.retry`, kartu gagal | Uji regresi Mac dan uji UI Simulator |
+| KF-09 | `AppStore.editTranscript`, `AppStore.resummarize`, lembar edit transkrip dan transkrip asli | Uji regresi Mac (20 uji) dan uji UI Simulator |
 | KNF-01 | Model di dalam aplikasi, `download: false` | Transkripsi berhasil dengan jaringan diblokir |
 | KNF-02 | Pemilihan model per HP, target iOS 17 | Build iOS 17 berhasil; uji di XR menunggu |
 | KNF-03 | Pemecahan per bagian, model dilepas bergantian | Kualitas di Mac; waktu dan memori di HP menunggu |
@@ -160,9 +165,10 @@ Gambar 5. Deployment Diagram Voice-to-Todo
 
 Rincian lengkap ada di `docs/catatan-uji.md`. Ringkasnya:
 
-- Logika aplikasi: 39 unit test inti dan 52 uji regresi lolos di Mac.
+- Logika aplikasi: 39 unit test inti dan 72 uji regresi lolos di Mac.
 - Uji UI otomatis di Simulator lolos: alur to-do (tambah, centang, edit, hapus, Urungkan), proses AI sungguhan dari
-  rekaman sampai to-do muncul lalu rekaman dihapus dan diurungkan, serta ukuran huruf besar.
+  rekaman sampai to-do muncul lalu rekaman dihapus dan diurungkan, ukuran huruf besar, serta edit transkrip (edit,
+  lihat transkrip asli, kembalikan ke asli, Urungkan).
 - Rangkaian AI lengkap berjalan di dalam aplikasi (Simulator) untuk lima rekaman uji tanpa kegagalan.
 - Kualitas di Mac dengan audio sintetis: Whisper turbo WER 5%; Qwen3-4B menemukan 15 dari 17 to-do dengan 0,2
   to-do karangan per rekaman.
@@ -175,5 +181,7 @@ Keterbatasan yang jujur:
   memberi hasil lebih rendah; lima rekaman asli dengan catatan to-do manual masih dibutuhkan.
 - Model kecil masih bisa melewatkan to-do atau salah memasangkan frasa waktu; pengguna bisa mengubah, menambah, dan
   menghapus to-do.
+- Ringkas ulang dari transkrip yang diedit baru diuji dengan peringkas tiruan di Mac, belum dengan model sungguhan
+  di HP.
 - Pemuatan pertama model suara bisa memakan waktu lama di HP karena Core ML menyiapkan model untuk perangkat.
 - Akun Apple gratis membuat aplikasi kedaluwarsa 7 hari setelah dipasang.

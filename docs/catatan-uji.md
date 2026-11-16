@@ -120,6 +120,9 @@ berhasil untuk iOS, target minimum di proyek 17.0), tetapi **belum diuji di HP**
 | To-do tidak dobel di Beranda | Selesaikan satu rekaman: to-do hanya tampil di kartu hasil. Pindah ke Riwayat lalu kembali: to-do muncul di daftar | belum diuji |
 | Edit ringkasan dengan Batal dan Simpan | Tekan Edit, ubah teks, tekan Batal: teks kembali seperti semula. Ubah lagi, tekan Simpan: tersimpan. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
 | Pesan gagal sesuai penyebab | Rekam diam saja: "Tidak ada suara yang terdengar…". Rekam satu-dua kata: "…terlalu pendek…". Tutup paksa aplikasi saat memproses lalu buka lagi: "Proses terhenti…" | belum diuji |
+| Edit transkrip | Buka detail rekaman yang selesai, buka "Transkrip lengkap", tekan "Edit transkrip", ubah teksnya, Simpan: chip "Diedit" dan catatan "Transkrip sudah diubah…" muncul. Kosongkan teks: Simpan tidak bisa ditekan | belum diuji |
+| Lihat dan kembalikan transkrip asli | Setelah transkrip diedit, tekan "Lihat transkrip asli": teks hasil AI tampil. Tekan "Kembalikan ke asli": transkrip kembali seperti hasil AI dan chip "Diedit" hilang | belum diuji |
+| Ringkas ulang dengan model asli | Mode pesawat. Edit transkrip (misalnya tambah satu tugas), tekan "Ringkas ulang" lalu konfirmasi: tahap langsung "Merangkum..." tanpa "Mengubah suara jadi teks...", to-do lama diganti hasil baru, dan tugas tambahan ikut muncul | belum diuji |
 
 Sudah dibuktikan di Mac (2026-11-12, kode `Models.swift` asli dikompilasi untuk macOS): rekaman lama tanpa kolom
 keterangan baru (`stopNote`) tetap terbaca, dan keterangan tersimpan lalu terbaca kembali dengan benar.

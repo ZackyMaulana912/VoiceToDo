@@ -10,5 +10,6 @@ npx -p @mermaid-js/mermaid-cli@11.4.2 mmdc -i 3-class.mmd -o 3-class.png -s 2 -b
 npx -p @mermaid-js/mermaid-cli@11.4.2 mmdc -i 4-state.mmd -o 4-state.png -s 2 -b white
 ```
 
-Diagram digambar dari kode di `ios/` per 12 November 2026. Kalau kode berubah, perbarui sumbernya lalu buat ulang
+Diagram digambar dari kode di `ios/` per 12 November 2026, lalu diperbarui 16 November 2026 untuk fitur edit
+transkrip (Use Case, Class, dan State Machine). Kalau kode berubah, perbarui sumbernya lalu buat ulang
 gambarnya.

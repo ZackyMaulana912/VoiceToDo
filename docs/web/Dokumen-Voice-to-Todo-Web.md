@@ -148,3 +148,50 @@ HP hanya menjalankan halaman dan menyimpan data. Pemrosesan AI terjadi di server
 ![Deployment Diagram](diagram/5-deployment.png)
 
 Gambar 5. Deployment Diagram Voice-to-Todo versi web
+
+## 6. Keterlacakan kebutuhan
+
+| ID | Komponen | Bukti uji (17 November 2026) |
+|---|---|---|
+| KF-01 | `useRecorder`, `Perekam` | Playwright `rekam.spec.ts` (8 uji, mikrofon palsu) |
+| KF-02 | `repo.buatRekaman`, `pulihkanTersangkut` | Vitest `repo.test.ts` (12 uji); Playwright: audio tersimpan sebelum diproses, penyimpanan penuh |
+| KF-03 | `server/transcribe.ts` | Vitest `server.test.ts` dengan klien tiruan; API asli dicoba pengembang (README) |
+| KF-04 | `server/summarize.ts`, `SkemaHasilProses` | Vitest `server.test.ts` (36 uji, termasuk validasi dan coba ulang) |
+| KF-05 | `server/kalender.ts`, `rapikanKeluaran`, `lib/waktu.ts` | Vitest `server.test.ts` dan `waktu.test.ts` (14 uji) |
+| KF-06 | `repo` (ubahSelesai, ubahTeks, tambahTugas, hapusTugas, hapusRekaman) | Vitest `repo.test.ts`; Playwright `layar.spec.ts` (19 uji) |
+| KF-07 | `Riwayat`, `DetailRekaman`, `Transkrip`, `lib/salin.ts` | Playwright `layar.spec.ts`; Vitest `salin.test.ts` |
+| KF-08 | `prosesRekaman`, `HasilGagal` | Playwright `proses.spec.ts` (7 uji: offline, server gagal, 429, jawaban tidak sesuai skema) |
+| KNF-W1 | `lib/perekam/mime.ts` (WebM atau MP4 untuk Safari) | Vitest `mime.test.ts` (9 uji); perekaman di Safari iPhone dicoba pengembang (README) |
+| KNF-W2 | `lib/db.ts`, server tanpa penyimpanan | Tidak ada kode penyimpanan di server; log hanya kode dan angka |
+| KNF-W3 | Kunci dibaca di `server/` saja | Kunci tidak muncul di kode browser |
+| KNF-W4 | Komponen UI dengan label dan fokus | Playwright `a11y.spec.ts` (11 uji axe WCAG 2.2 AA) dan `ukur.spec.ts` (8 uji ukuran) |
+| KNF-W5 | `server/proses.ts`, `server/rate-limit.ts` | Playwright: permintaan tidak sah ditolak, permintaan beruntun dibatasi |
+
+## 7. Hasil uji dan keterbatasan
+
+Uji dijalankan ulang pada 17 November 2026 di Mac (Node.js 22.23.4) dari salinan repo commit `5116f11`:
+
+- Pemeriksaan kode (ESLint) dan pemeriksaan tipe (TypeScript) lolos.
+- 84 unit test Vitest lolos: data dan IndexedDB, server dan penyedia AI tiruan, waktu, salin, komponen, dan format
+  audio.
+- 59 uji browser Playwright lolos (Chromium, layar 390x844, mikrofon palsu, penyedia AI tiruan): perekaman, proses dan
+  kegagalan, tampilan, ukuran sesuai Figma, serta 11 audit aksesibilitas axe.
+- Situs `https://voice-to-todo-nine.vercel.app` bisa dibuka (HTTP 200) pada 17 November 2026.
+
+Keterbatasan yang jujur:
+
+- **Butuh internet.** Tanpa internet rekaman tetap tersimpan, tetapi baru bisa diproses setelah tersambung lagi.
+- **Privasi.** Suara dan transkrip dikirim ke Groq (pihak ketiga) untuk diproses.
+- **Kuota gratis Groq terbatas.** Bila habis, aplikasi menampilkan "Terlalu banyak permintaan".
+- **Pembatas permintaan disimpan di memori server.** Di Vercel yang bisa menjalankan beberapa salinan server
+  sekaligus, batas 10 permintaan per 10 menit tidak dijamin tepat.
+- **Tanggal tenggat dipilih AI** dari tabel tanggal, bukan dihitung kode. Kode hanya membuang tanggal yang mustahil.
+  "Minggu depan" bisa diberi tanggal oleh AI (berbeda dengan versi iPhone yang membiarkannya tanpa tanggal).
+- **Belum ada edit transkrip, ringkas ulang, dan Urungkan.** Hapus rekaman langsung permanen setelah konfirmasi.
+- **Data hanya di satu browser.** Menghapus data situs di browser ikut menghapus semua rekaman.
+- Uji otomatis memakai penyedia AI tiruan. Alur dengan Groq asli dan perekaman di Safari iPhone dicatat sudah dicoba
+  oleh pengembang web (README), tetapi belum diulang dan belum diukur kualitas atau kecepatannya di dokumen ini.
+- Pengaturan penyedia AI di Vercel (variabel lingkungan) tidak bisa dilihat dari kode, jadi belum dipastikan
+  apakah situs yang terpasang memakai Groq.
+- Belum diuji di perangkat sungguhan: merekam saat layar terkunci atau tab di latar belakang, dan pembaca layar
+  VoiceOver atau TalkBack.

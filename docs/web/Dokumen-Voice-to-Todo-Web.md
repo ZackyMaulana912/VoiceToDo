@@ -84,3 +84,67 @@ Aplikasi memakai pola klien dan server dengan lapisan berikut:
    jawaban, lalu menyimpan hasil atau kode galat.
 4. **Server** (`app/api/process`, `server/`): memeriksa permintaan, memanggil penyedia transkripsi dan ringkasan
    lewat antarmuka `Transkriptor` dan `Peringkas`, lalu mengembalikan hasil tanpa menyimpannya.
+
+## 5. Model 4+1 View
+
+### 5.1 Scenario View
+
+Pengguna memakai aplikasi lewat browser HP. Merekam dan Coba lagi melibatkan layanan AI di server.
+
+![Use Case Diagram](diagram/1-use-case.png)
+
+Gambar 1. Use Case Diagram Voice-to-Todo versi web
+
+Urutan proses satu rekaman, dari tombol Selesai sampai hasil tampil:
+
+![Sequence Diagram](diagram/2-sequence.png)
+
+Gambar 2. Sequence Diagram proses satu rekaman Voice-to-Todo versi web
+
+### 5.2 Logical View
+
+Kode web memakai tipe dan fungsi TypeScript, bukan class. Modul digambar sebagai kelas dengan stereotip «modul».
+
+![Class Diagram](diagram/3-class.png)
+
+Gambar 3. Class Diagram Voice-to-Todo versi web
+
+### 5.3 Process View
+
+Status rekaman dari menekan tombol rekam sampai selesai, gagal, atau dihapus:
+
+![State Machine Diagram](diagram/4-state.png)
+
+Gambar 4. State Machine Diagram status rekaman Voice-to-Todo versi web
+
+### 5.4 Development View
+
+| Folder | Isi |
+|---|---|
+| `app/` | Halaman (`/`, `/riwayat`, `/riwayat/[id]`) dan `api/process` |
+| `components/ui/` | Komponen dari frame Komponen di Figma |
+| `components/fitur/` | Layar: Beranda, Perekam, Riwayat, DetailRekaman |
+| `lib/` | IndexedDB (db, repo), perekaman, format waktu, pemrosesan di browser |
+| `server/` | Transkripsi, ringkasan, tabel tanggal, pembatas permintaan |
+| `e2e/` | Uji Playwright (layar 390x844) dan tangkapan layar |
+| `docs/design-gaps.md` | Celah desain dan keputusan yang diambil |
+
+| Teknologi | Versi |
+|---|---|
+| Next.js | 16.4.6 |
+| React | 19.3.0 |
+| TypeScript | 5.9.3 |
+| Tailwind CSS | 4.3.3 |
+| Dexie (IndexedDB) | 4.4.7 |
+| zod | 4.6.7 |
+| Model suara | Groq `whisper-large-v3` |
+| Model ringkasan | Groq `openai/gpt-oss-120b` (cadangan: Claude `claude-haiku-5-5`) |
+| Uji | Vitest 5.1.0, Playwright 1.65.0, axe-core 4.14.0 |
+
+### 5.5 Physical View
+
+HP hanya menjalankan halaman dan menyimpan data. Pemrosesan AI terjadi di server Vercel dan Groq.
+
+![Deployment Diagram](diagram/5-deployment.png)
+
+Gambar 5. Deployment Diagram Voice-to-Todo versi web

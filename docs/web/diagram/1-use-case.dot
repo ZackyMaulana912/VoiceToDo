@@ -1,0 +1,22 @@
+// Gambar 1. Use Case Diagram Voice-to-Todo versi web (dari kode voice-to-todo/ commit 5116f11, 2026-11-17)
+digraph usecase {
+  rankdir=LR; nodesep=0.2; ranksep=1.3; fontname="Helvetica"; node [fontname="Helvetica", fontsize=12];
+  pengguna [shape=none, label=<<table border="0" cellborder="0"><tr><td><font point-size="36">&#x1F464;</font></td></tr><tr><td>Pengguna</td></tr></table>>];
+  ai [shape=none, label=<<table border="0" cellborder="0"><tr><td><font point-size="36">&#x1F464;</font></td></tr><tr><td>Layanan AI<br/>(Groq)</td></tr></table>>];
+  subgraph cluster_app {
+    label="Voice-to-Todo versi web (browser HP, butuh internet)"; style=rounded; color="#4f46e5"; fontcolor="#4f46e5";
+    node [shape=ellipse, style=filled, fillcolor="#eef2ff", color="#4338ca"];
+    hapusrek [label="Menghapus rekaman"];
+    coba [label="Mencoba lagi\nrekaman yang gagal"];
+    salin [label="Menyalin hasil"];
+    riwayat [label="Melihat riwayat\ndan detail rekaman"];
+    hapus [label="Menghapus to-do"];
+    ubah [label="Menambah dan\nmengubah to-do"];
+    centang [label="Mencentang to-do"];
+    hasil [label="Melihat ringkasan, poin,\ndan to-do"];
+    rekam [label="Merekam dan memproses suara\n(maks. 10 menit)"];
+  }
+  pengguna -> {hapusrek coba salin riwayat hapus ubah centang hasil rekam} [arrowhead=none];
+  rekam -> ai [arrowhead=none];
+  coba -> ai [arrowhead=none];
+}

@@ -1,0 +1,33 @@
+// Gambar 5. Deployment Diagram Voice-to-Todo versi web (dari kode voice-to-todo/ commit 5116f11, 2026-11-17)
+digraph deployment {
+  rankdir=TB; compound=true; nodesep=0.6; ranksep=0.9; fontname="Helvetica"; node [fontname="Helvetica", fontsize=11]; edge [fontname="Helvetica", fontsize=10];
+  subgraph cluster_hp {
+    label="«device» HP pengguna"; style="rounded,bold"; color="#0f172a";
+    mic [shape=box3d, label="«device»\nMikrofon"];
+    subgraph cluster_browser {
+      label="«execution environment» Browser (Safari / Chrome)"; style=rounded; color="#4f46e5";
+      ui [shape=component, label="Halaman React\n(Beranda, Perekam, Riwayat, Detail)"];
+      idb [shape=note, label="IndexedDB\n(rekaman, to-do, audio)"];
+      {rank=same; ui; idb;}
+    }
+  }
+  subgraph cluster_vercel {
+    label="«device» Vercel (cloud)"; style="rounded,bold"; color="#0f172a";
+    subgraph cluster_fn {
+      label="«execution environment» Next.js 16 (Node.js)"; style=rounded; color="#4f46e5";
+      api [shape=component, label="POST /api/process\n(validasi, batas permintaan)"];
+      env [shape=note, label="Kunci API\n(hanya di server)"];
+      {rank=same; api; env;}
+    }
+  }
+  subgraph cluster_groq {
+    label="«device» Groq API (pihak ketiga)"; style="rounded,bold"; color="#b45309";
+    gw [shape=component, label="whisper-large-v3\n(suara jadi teks)"];
+    gs [shape=component, label="gpt-oss-120b\n(ringkasan dan to-do)"];
+    {rank=same; gw; gs;}
+  }
+  mic -> ui; ui -> idb;
+  ui -> api [label="  HTTPS, audio maks. 4 MB"];
+  api -> env [style=dotted];
+  api -> gw [label="  HTTPS"]; api -> gs [label="  HTTPS"];
+}

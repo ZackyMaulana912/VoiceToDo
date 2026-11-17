@@ -58,3 +58,29 @@ KF-09 (edit transkrip dan ringkas ulang) hanya ada di versi iPhone.
 | KNF-W3 | Kunci API layanan AI hanya ada di server, tidak pernah dikirim ke browser |
 | KNF-W4 | Memenuhi aksesibilitas WCAG 2.2 AA (kontras, area sentuh, label pembaca layar, navigasi keyboard) |
 | KNF-W5 | Melindungi server dari pemakaian berlebih: audio maksimal 4 MB, 10 permintaan per 10 menit per alamat IP |
+
+## 3. Keputusan desain utama
+
+| Keputusan | Alasan |
+|---|---|
+| AI berjalan di server lewat Groq: `whisper-large-v3` untuk suara dan `openai/gpt-oss-120b` untuk ringkasan | Kualitas model besar tanpa membebani HP; Groq punya tier gratis |
+| Penyedia AI bisa diganti lewat variabel lingkungan (Groq, Claude, OpenAI, atau tiruan) | Bisa pindah penyedia tanpa mengubah kode; versi tiruan dipakai untuk uji |
+| Rekaman dan audionya ditulis ke IndexedDB dalam satu transaksi sebelum dikirim | Rekaman tidak hilang walau internet putus atau server gagal (KF-02) |
+| Keluaran AI dipaksa berbentuk JSON ketat, lalu divalidasi zod di server dan sekali lagi di browser; coba ulang sekali | Hasil rusak tidak masuk ke data |
+| AI memilih tanggal tenggat dari tabel 15 hari yang disiapkan kode; tanggal sebelum hari rekaman atau lebih dari 366 hari dibuang | Model tidak perlu berhitung sendiri, dan tanggal yang mustahil tidak tersimpan |
+| Server tidak menyimpan apa pun dan log hanya berisi kode galat, ukuran, dan durasi | Privasi (KNF-W2) |
+| Batas audio 4 MB dan rekaman 32 kbps | Batas badan permintaan Vercel 4,5 MB; rekaman 10 menit sekitar 2,4 MB |
+| Setiap kegagalan punya kode galat dan keterangan di layar | Tidak gagal diam-diam |
+
+## 4. Pola arsitektur
+
+Aplikasi memakai pola klien dan server dengan lapisan berikut:
+
+1. **Tampilan** (React, komponen dari Figma): Beranda, Perekam, Riwayat, Detail. Tampilan membaca data langsung dari
+   IndexedDB lewat `useLiveQuery`, sehingga otomatis berubah saat data berubah.
+2. **Data di browser** (`lib/repo.ts`, Dexie): satu-satunya tempat menulis ke IndexedDB, berisi tiga tabel: rekaman,
+   tugas, dan audio.
+3. **Pemroses di browser** (`lib/proses.ts`): mengambil audio yang tersimpan, mengirimnya ke server, memvalidasi
+   jawaban, lalu menyimpan hasil atau kode galat.
+4. **Server** (`app/api/process`, `server/`): memeriksa permintaan, memanggil penyedia transkripsi dan ringkasan
+   lewat antarmuka `Transkriptor` dan `Peringkas`, lalu mengembalikan hasil tanpa menyimpannya.

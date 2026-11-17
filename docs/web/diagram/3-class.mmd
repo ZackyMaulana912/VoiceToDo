@@ -1,0 +1,58 @@
+%% Gambar 3. Class Diagram Voice-to-Todo versi web (dari kode voice-to-todo/ commit 5116f11, 2026-11-17)
+%% Kode web memakai fungsi dan tipe TypeScript, bukan class. Modul digambar sebagai kelas berstereotip «modul».
+classDiagram
+    direction TB
+    class Rekaman {
+        +string id
+        +number dibuat
+        +number durasiMs
+        +status: memproses | selesai | gagal
+        +string judul
+        +kategori: Rapat | Kuliah | Ide
+        +string ringkasan
+        +string[] poin
+        +string transkrip
+        +string galat
+    }
+    class Tugas {
+        +string id
+        +string teks
+        +string tenggat
+        +boolean selesai
+    }
+    class AudioRekaman {
+        +ArrayBuffer data
+        +string mimeType
+    }
+    class repo {
+        <<modul browser>>
+        +buatRekaman()
+        +simpanHasil()
+        +tandaiGagal()
+        +hapusRekaman()
+        +ubahTeks() / tambahTugas() / hapusTugas()
+    }
+    class prosesRekaman {
+        <<modul browser>>
+        +prosesRekaman(id)
+    }
+    class prosesPermintaan {
+        <<modul server>>
+        +prosesPermintaan(audio) hasil
+    }
+    class Transkriptor {
+        <<interface>>
+        +transkripsi(audio) teks
+    }
+    class Peringkas {
+        <<interface>>
+        +ringkas(transkrip, tanggal) hasil
+    }
+
+    Rekaman "1" *-- "*" Tugas
+    Rekaman "1" *-- "0..1" AudioRekaman
+    repo ..> Rekaman : simpan di IndexedDB
+    prosesRekaman --> repo
+    prosesRekaman ..> prosesPermintaan : kirim audio
+    prosesPermintaan --> Transkriptor : Groq whisper
+    prosesPermintaan --> Peringkas : Groq gpt-oss

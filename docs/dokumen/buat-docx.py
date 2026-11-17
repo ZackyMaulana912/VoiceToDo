@@ -3,19 +3,23 @@
 
 Yang didukung: judul (#, ##, ###), paragraf, daftar (- dan 1.), tabel, gambar ![..](path), **tebal**, `kode`.
 Baris yang diawali "Gambar N." tepat setelah gambar menjadi keterangan gambar (di tengah, miring).
-Pemakaian: python3 docs/dokumen/buat-docx.py
+Pemakaian: python3 docs/dokumen/buat-docx.py [file.md]
+Tanpa argumen: Dokumen-Voice-to-Todo.md di folder ini. File .docx dibuat di sebelah file .md-nya.
+Contoh versi web: python3 docs/dokumen/buat-docx.py docs/web/Dokumen-Voice-to-Todo-Web.md
 """
 import os
 import re
+import sys
 
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Inches, Pt, RGBColor
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "Dokumen-Voice-to-Todo.md")
-OUT = os.path.join(HERE, "Dokumen-Voice-to-Todo.docx")
+SRC = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "Dokumen-Voice-to-Todo.md")
+HERE = os.path.dirname(SRC)
+OUT = os.path.splitext(SRC)[0] + ".docx"
 
 
 def inline(paragraph, text):

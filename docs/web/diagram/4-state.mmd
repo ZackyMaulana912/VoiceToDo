@@ -1,0 +1,13 @@
+%% Gambar 4. State Machine Diagram status rekaman versi web (dari kode voice-to-todo/ commit 5116f11, 2026-11-17)
+stateDiagram-v2
+    [*] --> MenungguIzin : tekan tombol rekam
+    MenungguIzin --> Merekam : izin mikrofon diberikan
+    MenungguIzin --> [*] : izin ditolak, lalu Batal
+    Merekam --> [*] : Batal (rekaman dibuang)
+    Merekam --> Memproses : Selesai / batas 10 menit (rekaman disimpan dulu)
+    Memproses --> Selesai : hasil tervalidasi
+    Memproses --> Gagal : offline, terlalu sering, tidak terdengar, server gagal, atau tab ditutup
+    Gagal --> Memproses : Coba lagi (bila audio masih ada)
+    Selesai --> Dihapus : Hapus rekaman
+    Gagal --> Dihapus : Hapus rekaman
+    Dihapus --> [*] : permanen, tanpa Urungkan

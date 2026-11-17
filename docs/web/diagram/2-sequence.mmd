@@ -1,0 +1,33 @@
+%% Gambar 2. Sequence Diagram proses satu rekaman versi web (dari kode voice-to-todo/ commit 5116f11, 2026-11-17)
+sequenceDiagram
+    actor P as Pengguna
+    participant PR as Perekam (useRecorder)
+    participant BR as Beranda
+    participant DB as IndexedDB (Dexie)
+    participant PS as prosesRekaman (browser)
+    participant API as /api/process (Vercel)
+    participant G as Groq API
+
+    P->>PR: Tekan Selesai (atau batas 10 menit)
+    PR-->>BR: Audio (WebM/MP4, 32 kbps), durasi
+    BR->>DB: buatRekaman: rekaman "memproses" + audio (satu transaksi)
+    BR->>PS: prosesRekaman(id)
+    PS->>DB: Ambil rekaman dan audio
+    PS->>API: POST audio, tanggal rekaman, durasi
+    API->>API: Cek batas permintaan (10 per 10 menit per IP), ukuran 4 MB, tipe, durasi
+    API->>G: Transkripsi whisper-large-v3 (bahasa id)
+    G-->>API: Transkrip
+    loop Paling banyak 2 kali
+        API->>G: Ringkasan gpt-oss-120b (JSON ketat) + tabel tanggal 15 hari
+        G-->>API: Judul, kategori, ringkasan, poin, to-do + tanggal
+        API->>API: Validasi zod, buang tanggal yang mustahil
+    end
+    API-->>PS: Hasil JSON (server tidak menyimpan apa pun)
+    PS->>PS: Validasi ulang dengan SkemaHasilProses
+    PS->>DB: simpanHasil: rekaman "selesai" + to-do (satu transaksi)
+    DB-->>BR: useLiveQuery memperbarui tampilan
+    BR-->>P: Kartu hasil terbaru di Beranda
+    alt Offline atau gagal di tahap mana pun
+        PS->>DB: Status "gagal" + kode galat, audio tetap tersimpan
+        BR-->>P: Keterangan penyebab + tombol Coba lagi
+    end

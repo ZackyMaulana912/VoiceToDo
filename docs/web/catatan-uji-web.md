@@ -37,3 +37,16 @@ karena tipe rute Next.js belum dibuat.
 | `components/ui/komponen.test.tsx` | 11 | Komponen tampilan |
 | `lib/perekam/mime.test.ts` | 9 | Pemilihan format audio (WebM, atau MP4 untuk Safari) |
 | `lib/salin.test.ts` | 2 | Teks yang disalin dari hasil rekaman |
+
+## 4. Uji tampilan dan alur (Playwright)
+
+`npx playwright test`: **59 dari 59 lolos** dalam 17 detik. Mikrofon diganti mikrofon palsu dari Chromium.
+
+| File | Jumlah | Yang diuji |
+|---|---|---|
+| `layar.spec.ts` | 19 | Semua layar Figma, data bertahan setelah reload, rekaman tersangkut jadi Gagal, Salin |
+| `a11y.spec.ts` | 11 | axe-core di setiap layar, alur lewat keyboard, kurangi gerakan, layar 320 px, area sentuh 48 px |
+| `rekam.spec.ts` | 8 | Audio tersimpan sebelum diproses, Batal, berhenti di 10 menit, izin ditolak, penyimpanan penuh |
+| `ukur.spec.ts` | 8 | Ukuran komponen sama dengan Figma |
+| `proses.spec.ts` | 7 | Offline, server gagal, terlalu banyak permintaan, jawaban server yang tidak sesuai skema ditolak |
+| `komponen.spec.ts` | 6 | Halaman katalog komponen dan dialog hapus |

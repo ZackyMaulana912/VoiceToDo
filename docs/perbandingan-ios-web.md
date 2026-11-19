@@ -28,3 +28,18 @@ kalau data situs dihapus atau pindah browser, rekamannya tidak ikut.
 | Kecepatan | Bergantung HP; belum diukur di HP sungguhan | Bergantung jaringan dan antrean Groq |
 
 Di kedua versi, tanggal sebelum hari rekaman atau lebih dari 366 hari setelahnya dibuang, dan to-do-nya tetap ada.
+
+## 3. Fitur yang berbeda
+
+| Fitur | iPhone | Web |
+|---|---|---|
+| Rekam sampai 10 menit, berhenti otomatis | v | v |
+| Rekaman disimpan sebelum diproses, bisa Coba lagi | v | v |
+| Centang, ubah, tambah, dan hapus to-do | v | v |
+| Riwayat, detail, dan transkrip lengkap | v | v |
+| Salin hasil sebagai teks | v | v |
+| Edit transkrip dan lihat transkrip asli hasil AI (KF-09) | v | x |
+| Ringkas ulang dari transkrip yang sudah diedit (KF-09) | v | x |
+| Urungkan setelah menghapus | v | x (hapus langsung permanen) |
+| Format audio | WAV 16 kHz mono | WebM atau MP4, 32 kbps, maksimal 4 MB |
+| Batas pemakaian | Tidak ada | 10 permintaan per 10 menit per alamat |

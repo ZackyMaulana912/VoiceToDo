@@ -15,3 +15,16 @@ repo `voice-to-todo` commit `5116f11`. Per 19 November 2026.
 
 Kedua versi sama-sama tidak punya akun dan tidak menyinkronkan data. Bedanya, data web hanya ada di satu browser:
 kalau data situs dihapus atau pindah browser, rekamannya tidak ikut.
+
+## 2. Cara AI bekerja
+
+| Hal | iPhone | Web |
+|---|---|---|
+| Suara jadi teks | WhisperKit di HP (turbo untuk A15 ke atas, base untuk XR) | Groq whisper-large-v3 |
+| Ringkasan dan to-do | Qwen3 di HP lewat llama.cpp (4B, atau 1.7B bila memori kurang) | Groq gpt-oss-120b |
+| Bentuk keluaran | Dipaksa grammar JSON, lalu divalidasi kode | JSON ketat, divalidasi zod di server dan di browser |
+| Tanggal tenggat | AI hanya menyalin frasa waktu ("Jumat", "besok"), kode yang menghitung tanggalnya | AI memilih tanggal dari tabel kalender 15 hari yang diberikan server |
+| "Minggu depan" | Tanpa tenggat, frasanya disimpan | Bisa diberi tanggal oleh AI |
+| Kecepatan | Bergantung HP; belum diukur di HP sungguhan | Bergantung jaringan dan antrean Groq |
+
+Di kedua versi, tanggal sebelum hari rekaman atau lebih dari 366 hari setelahnya dibuang, dan to-do-nya tetap ada.

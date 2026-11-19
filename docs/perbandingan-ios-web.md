@@ -43,3 +43,18 @@ Di kedua versi, tanggal sebelum hari rekaman atau lebih dari 366 hari setelahnya
 | Urungkan setelah menghapus | v | x (hapus langsung permanen) |
 | Format audio | WAV 16 kHz mono | WebM atau MP4, 32 kbps, maksimal 4 MB |
 | Batas pemakaian | Tidak ada | 10 permintaan per 10 menit per alamat |
+
+## 4. Pemasangan dan biaya
+
+| Hal | iPhone | Web |
+|---|---|---|
+| Cara pasang | Lewat Xcode dari Mac, kabel ke HP | Buka alamat web lewat HTTPS |
+| Masa berlaku | 7 hari (akun developer gratis), lalu pasang ulang | Tidak ada |
+| HP yang didukung | iPhone XR (iOS 17) sampai iPhone 17 Pro | HP apa pun dengan browser modern dan mikrofon |
+| Ukuran aplikasi | Besar, karena model AI ikut di dalam aplikasi | Kecil, model ada di server |
+| Biaya berjalan | Tidak ada | Kuota API Groq per rekaman, ditambah hosting Vercel |
+| Kualitas ringkasan | Dibatasi model kecil di HP | Lebih baik, model besar di server |
+
+**Kapan pakai yang mana.** Versi iPhone cocok untuk rekaman yang tidak boleh keluar dari HP, atau saat tidak ada
+sinyal. Versi web cocok untuk dipakai banyak orang tanpa pemasangan, selama ada internet dan rekamannya boleh dikirim
+ke penyedia AI.

@@ -50,3 +50,14 @@ karena tipe rute Next.js belum dibuat.
 | `ukur.spec.ts` | 8 | Ukuran komponen sama dengan Figma |
 | `proses.spec.ts` | 7 | Offline, server gagal, terlalu banyak permintaan, jawaban server yang tidak sesuai skema ditolak |
 | `komponen.spec.ts` | 6 | Halaman katalog komponen dan dialog hapus |
+
+## 5. Yang belum diuji di sini
+
+- Proses dengan Groq sungguhan. Uji di atas memakai AI tiruan, jadi kualitas transkrip, ringkasan, dan tanggal
+  tenggat dari Groq tidak ikut terukur.
+- Situs yang sudah terpasang (`voice-to-todo-nine.vercel.app`), termasuk pengaturan kunci API di Vercel. Menunggu
+  persetujuan karena memakai kuota Groq rekan tim.
+- Perekaman di Safari iPhone dan Chrome Android sungguhan. Mikrofon palsu Chromium tidak mewakili browser HP.
+- Batas permintaan di Vercel. Penghitungnya disimpan di memori server, jadi bisa ter-reset setiap kali fungsi
+  dinyalakan ulang.
+- VoiceOver dan TalkBack langsung di HP. axe-core hanya memeriksa aturan, bukan pengalaman memakai pembaca layar.

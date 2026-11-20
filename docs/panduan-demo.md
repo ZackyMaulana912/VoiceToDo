@@ -37,3 +37,15 @@ Kerjakan sehari sebelum demo, karena aplikasi dari akun developer gratis kedaluw
 5. **Web.** Rekam ucapan yang sama di situs web dan tunjukkan hasilnya. Prosesnya berjalan di server dengan model besar,
    jadi butuh internet.
 6. **Penutup.** Tampilkan tabel di `perbandingan-ios-web.md` untuk menjelaskan kapan memakai versi mana.
+
+## 4. Kalau ada masalah
+
+| Gejala | Kemungkinan penyebab | Yang dilakukan |
+|---|---|---|
+| Aplikasi iPhone tidak bisa dibuka | Sudah lebih dari 7 hari sejak dipasang | Pasang ulang dari Xcode |
+| "Untrusted Developer" | Profil developer belum dipercayai | Settings > General > VPN & Device Management |
+| Proses iPhone gagal "terganggu" | Aplikasi ditinggalkan saat memproses | Buka lagi aplikasinya, tekan Coba lagi |
+| "Memori HP tidak cukup" | Banyak aplikasi lain terbuka | Tutup aplikasi lain, tekan Coba lagi |
+| Web tidak bisa merekam | Situs dibuka lewat HTTP, atau izin mikrofon ditolak | Buka lewat HTTPS dan izinkan mikrofon di pengaturan browser |
+| Web gagal karena terlalu sering | Batas 10 permintaan per 10 menit, atau kuota Groq habis | Tunggu, lalu Coba lagi. Rekamannya tetap tersimpan di browser |
+| Web gagal karena offline | Internet putus saat memproses | Sambungkan lagi, lalu Coba lagi |

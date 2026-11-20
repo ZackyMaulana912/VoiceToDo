@@ -15,3 +15,12 @@ Kerjakan sehari sebelum demo, karena aplikasi dari akun developer gratis kedaluw
   diperkirakan lebih lama karena Core ML menyiapkan model (belum diuji di HP).
 - Isi baterai penuh dan matikan notifikasi yang bisa muncul di layar saat demo.
 - Nyalakan mode pesawat sebelum demo dimulai, untuk menunjukkan aplikasi tidak butuh internet.
+
+## 2. Persiapan versi web
+
+- Buka situs lewat HTTPS di browser HP (Safari di iPhone atau Chrome di Android). Lewat HTTP biasa, browser tidak
+  mengizinkan mikrofon.
+- Izinkan mikrofon saat diminta, lalu coba satu rekaman pendek untuk memastikan kunci API di server masih berlaku.
+- Pastikan HP tersambung internet yang stabil. Hotspot cadangan berguna kalau Wi-Fi ruangan lambat.
+- Jangan mencoba terlalu sering sebelum demo: server membatasi 10 permintaan per 10 menit per alamat, dan kuota Groq
+  milik rekan tim ikut terpakai.

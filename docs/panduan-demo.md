@@ -24,3 +24,16 @@ Kerjakan sehari sebelum demo, karena aplikasi dari akun developer gratis kedaluw
 - Pastikan HP tersambung internet yang stabil. Hotspot cadangan berguna kalau Wi-Fi ruangan lambat.
 - Jangan mencoba terlalu sering sebelum demo: server membatasi 10 permintaan per 10 menit per alamat, dan kuota Groq
   milik rekan tim ikut terpakai.
+
+## 3. Urutan demo
+
+1. **iPhone, mode pesawat.** Rekam ucapan sekitar 1 menit yang berisi beberapa tugas bertenggat, misalnya "kirim
+   laporan hari Jumat" dan "rapat lagi besok". Tunjukkan tahap "Mengubah suara jadi teks..." lalu "Merangkum...".
+2. **Hasil iPhone.** Tunjukkan judul, kategori, ringkasan, poin, dan to-do. Jelaskan bahwa tanggal tenggat dihitung
+   kode, bukan AI, jadi "Jumat" selalu jatuh di Jumat berikutnya.
+3. **Kelola to-do.** Centang satu to-do, edit satu, hapus satu, lalu tekan Urungkan.
+4. **Edit transkrip dan Ringkas ulang.** Tambahkan satu tugas di transkrip, Ringkas ulang, dan tunjukkan tugas itu
+   muncul (belum diuji di HP).
+5. **Web.** Rekam ucapan yang sama di situs web dan tunjukkan hasilnya. Prosesnya berjalan di server dengan model besar,
+   jadi butuh internet.
+6. **Penutup.** Tampilkan tabel di `perbandingan-ios-web.md` untuk menjelaskan kapan memakai versi mana.
